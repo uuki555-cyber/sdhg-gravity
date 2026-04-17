@@ -24,22 +24,20 @@ The mass dependence of `p` unifies the galaxy-scale RAR with galaxy cluster dyna
 
 ## Results
 
-- **SPARC 175 galaxies + 17 clusters**: 27% improvement over McGaugh+ 2016 (unified RMS)
+- **SPARC 175 galaxies + 17 clusters**: 25% improvement over McGaugh+ 2016 (unified RMS)
 - **LITTLE THINGS 17 dwarfs**: Independent validation, 27% improvement
 - **Ultra-dwarf prediction confirmed**: p < 0.25 for M < 10^8 (observed p = 0.17)
 - **Cluster ratio**: 0.95 +/- 0.09 (1.0 = perfect; McGaugh gives 0.65)
+- **Bayesian bias test**: Marginalizing over Y_disk and distance with Gaussian priors, p(M) remains suggestive (r=0.18) while G_eff control gives r=0.12. Galaxy-cluster difference is robust.
 
 ## Quick Start
 
 ```bash
 pip install numpy scipy
-python run_main_analysis.py
-python run_little_things.py
+python run_main_analysis.py        # Main analysis (SPARC + clusters)
+python run_little_things.py        # Independent validation (dwarf galaxies)
+python run_bayesian_test.py        # Bias test (Li+ 2021 methodology check)
 ```
-
-Expected output:
-- `run_main_analysis.py`: Fits p(M) to SPARC + clusters, reports RMS improvement
-- `run_little_things.py`: Independent test on LITTLE THINGS dwarfs
 
 ## Data
 
@@ -56,8 +54,9 @@ The exponent `p(M)` may reflect:
 
 We do not claim to identify the physical mechanism. We report the observational fact that `p` depends on `M`.
 
-## Limitations
+## Limitations and Caveats
 
+- **Li+ (2021) bias concern**: Fitting a parameter per galaxy risks spurious mass dependence due to Y_disk degeneracy. Our Bayesian test (`run_bayesian_test.py`) shows the galaxy-only signal is suggestive but not definitive (r=0.18 vs control r=0.12). The galaxy-to-cluster difference is robust.
 - `M0` is empirically determined (10^10.0 - 10^10.8 range); not yet derived from fundamental constants
 - Intrinsic scatter in per-galaxy `p` is ~0.13 (68% explained by M, 32% unexplained)
 - Large-scale structure (power spectrum shape) requires cosmological extension
