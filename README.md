@@ -92,3 +92,14 @@ MIT. See [LICENSE](LICENSE).
 ## Disclaimer
 
 This is an independent, exploratory research project by a non-academic individual. It has not been peer-reviewed or published in a scientific journal. Feedback, corrections, and independent verification are welcome via GitHub Issues.
+
+## Cross-Validation
+
+Leave-one-out cross-validation within SPARC (171 galaxies):
+
+| Method | RMS | vs McGaugh |
+|--------|-----|------------|
+| McGaugh (p=0.5) | 0.199 | baseline |
+| **p(M) LOO** | **0.187** | **+6.0%** |
+
+The improvement is concentrated in dwarf galaxies (logM < 9: +30%), while massive galaxies show no improvement (-1.5%). This confirms that p(M) generalizes to unseen data and is not overfitting, but the effect is primarily relevant for low-mass systems.
