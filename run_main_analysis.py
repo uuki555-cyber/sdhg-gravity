@@ -2,6 +2,10 @@
 Main analysis: Fit SDHG p(M) to SPARC galaxies + galaxy clusters.
 Compares with McGaugh+ 2016 (constant p = 0.5).
 
+NOTE: This script fits Y_disk per galaxy, which is subject to the
+Li+ (2021) bias concern. For the bias-free result, see run_global_fit.py.
+The M0 and alpha values here may differ from the global fit.
+
 Usage:
     python run_main_analysis.py
 """

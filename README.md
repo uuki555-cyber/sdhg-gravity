@@ -2,7 +2,7 @@
 
 **The exponent of the RAR interpolation function depends on baryonic mass.**
 
-This repository presents evidence that the Radial Acceleration Relation (McGaugh, Lelli & Schombert 2016) is better described by an interpolation function whose exponent varies with the baryonic mass of the system:
+This repository presents evidence that the Radial Acceleration Relation ([McGaugh, Lelli & Schombert 2016, PRL 117, 201101](https://doi.org/10.1103/PhysRevLett.117.201101)) is better described by an interpolation function whose exponent varies with the baryonic mass of the system:
 
 ```
 mu(x, M) = 1 - exp(-x^p(M))
@@ -75,7 +75,7 @@ python run_bayesian_test.py         # Li+ (2021) methodology check
 
 ## Related Work
 
-- Desmond & Famaey ([2024, MNRAS 530, 1781](https://doi.org/10.1093/mnras/stae713)): Parametrized the same exponent (as delta/2 in their delta-family) but fit it as a universal constant, not mass-dependent.
+- Desmond, Hees & Famaey ([2024, MNRAS 530, 1781](https://doi.org/10.1093/mnras/stae955)): Parametrized the same exponent (as delta/2 in their delta-family) but fit it as a universal constant, not mass-dependent.
 - EMOND — Zhao & Famaey (2012): Makes the acceleration scale a0 potential-dependent, not the exponent.
 - Superfluid DM — Berezhiani & Khoury ([2015, PRD 92, 103510](https://doi.org/10.1103/PhysRevD.92.103510)): BEC phase transition could provide a physical mechanism for mass-dependent modification.
 
