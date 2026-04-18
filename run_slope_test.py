@@ -59,7 +59,27 @@ def main():
         f_gas = Vg_last ** 2 / max(Vd_last ** 2 + Vg_last ** 2, 1)
         quality = np.mean(eV_arr / np.maximum(V_arr, 1))
 
-        data.append((gid, M_est, slope, coverage, f_gas, quality))
+        # MOND-predicted outer slope
+        V_mond = np.zeros(len(R_arr))
+        for j in range(len(R_arr)):
+            R = R_arr[j] * KPC
+            gb = (0.5 * (Vd_arr[j] * 1e3) ** 2
+                  + np.sign(Vg_arr[j]) * (Vg_arr[j] * 1e3) ** 2
+                  + 0.7 * (float(pts[j][5]) * 1e3) ** 2) / R
+            if gb > 0:
+                x = gb / A0
+                mu = max(1 - np.exp(-x ** 0.5), 1e-20)
+                V_mond[j] = np.sqrt(gb / mu * R) / 1e3
+            else:
+                V_mond[j] = V_arr[j]
+
+        V_mond_out = V_mond[-n_out:]
+        if V_mond_out.min() > 0:
+            slope_mond = np.polyfit(np.log10(R_out), np.log10(V_mond_out), 1)[0]
+        else:
+            slope_mond = slope
+
+        data.append((gid, M_est, slope, coverage, f_gas, quality, slope_mond))
 
     M = np.array([d[1] for d in data])
     logM = np.log10(M)
@@ -67,12 +87,18 @@ def main():
     C = np.array([d[3] for d in data])
     F = np.array([d[4] for d in data])
     Q = np.array([d[5] for d in data])
+    S_mond = np.array([d[6] for d in data])
 
     print(f"\nGalaxies: {len(data)}")
 
     # Raw correlation
     r0 = np.corrcoef(logM, S)[0, 1]
     print(f"\nRaw correlation (slope vs logM): r = {r0:+.3f}")
+
+    # MOND prediction
+    r_mond = np.corrcoef(logM, S_mond)[0, 1]
+    print(f"MOND-predicted slope vs logM:    r = {r_mond:+.3f}")
+    print(f"(MOND predicts slope-mass correlation from baryonic distribution alone)")
 
     # Multiple regression
     X = np.column_stack([logM, np.log10(np.maximum(C, 0.1)), F, Q, np.ones(len(data))])
