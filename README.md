@@ -74,7 +74,7 @@ python run_slope_test.py            # Rotation curve shape test (slope vs mass)
 - M0 is uncertain by a factor of ~5 (10^10.0 to 10^10.8), depending on fitting method and cluster weighting
 - The exponent 1/3 in the formula is approximate; the global fit gives alpha = 0.31 (6% below 1/3). CDT spectral dimension data suggests a different scaling exponent (gamma ~ 1.5 vs 0.31), so the theoretical motivation from CDT dimensional flow is not confirmed
 - The functional form p(M) = 2u/(1+3u) is empirical; its mathematical similarity to the CDT spectral dimension formula is noted but the physical connection is unestablished
-- Galaxy baryonic masses are estimated as M ~ 0.5 V_flat^2 R_last / G (dynamical proxy, not photometric)
+- Galaxy masses used in p(M) are dynamical proxies (M ~ 0.5 V_flat^2 R_last / G), not photometric baryonic masses. Using baryonic masses (from Vdisk, Vgas) reduces the improvement from 15.5% to 11.7% but the Li+ gap remains significant (6.7%). The optimal alpha shifts from 0.31 to 0.23, suggesting the relevant mass scale may be the total gravitational mass rather than baryonic mass alone
 - Large-scale structure compatibility requires cosmological extension (not addressed here)
 - **This work has not been peer-reviewed**
 
