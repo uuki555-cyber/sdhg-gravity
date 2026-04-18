@@ -29,7 +29,7 @@ The p(M) model improves over McGaugh by 15.5%, while a variable-G model (same nu
 
 ## Bias Test (Li+ 2021)
 
-Li, Lelli & McGaugh (2021, A&A 653, A170) showed that fitting a parameter per galaxy can create spurious mass dependence due to degeneracy with the stellar mass-to-light ratio Y_disk. We address this in three ways:
+Li, Lelli & McGaugh ([2021, A&A 653, A170](https://doi.org/10.1051/0004-6361/202040101)) showed that fitting a parameter per galaxy can create spurious mass dependence due to degeneracy with the stellar mass-to-light ratio Y_disk. We address this in three ways:
 
 1. **Global fit (`run_global_fit.py`)**: No per-galaxy fitting at all. Single Y_disk shared by all galaxies. p(M) still improves by 15.5%, while the control model (variable G with same degrees of freedom) achieves only 4.6%. **The 11% gap cannot be an artifact.**
 
@@ -69,9 +69,9 @@ python run_bayesian_test.py         # Li+ (2021) methodology check
 
 ## Related Work
 
-- **Desmond & Famaey (2024, MNRAS 530, 1781)**: Parametrized the same exponent (as delta/2 in their delta-family) but fit it as a universal constant, not mass-dependent.
-- **EMOND (Zhao & Famaey 2012)**: Makes the acceleration scale a0 potential-dependent, not the exponent.
-- **Superfluid DM (Berezhiani & Khoury 2015)**: BEC phase transition could provide a physical mechanism for mass-dependent modification.
+- Desmond & Famaey ([2024, MNRAS 530, 1781](https://doi.org/10.1093/mnras/stae713)): Parametrized the same exponent (as delta/2 in their delta-family) but fit it as a universal constant, not mass-dependent.
+- EMOND — Zhao & Famaey (2012): Makes the acceleration scale a0 potential-dependent, not the exponent.
+- Superfluid DM — Berezhiani & Khoury ([2015, PRD 92, 103510](https://doi.org/10.1103/PhysRevD.92.103510)): BEC phase transition could provide a physical mechanism for mass-dependent modification.
 
 ## License
 
