@@ -68,7 +68,7 @@ python run_slope_test.py            # Rotation curve shape test (slope vs mass)
 
 ## Limitations
 
-- **Cross-validation is neutral**: Applying SPARC-trained parameters to LITTLE THINGS gives -0.8% (no improvement). This may be due to crude enclosed-mass estimates for dwarfs, but it means we cannot yet confirm that p(M) generalizes to unseen data
+- **Cross-validation is mixed**: Leave-one-out within SPARC gives +6.0% improvement (see below), confirming p(M) is not overfitting. However, applying SPARC-trained parameters to LITTLE THINGS gives -0.8%, suggesting limited generalization across datasets (possibly due to different mass estimation methods)
 - **Rotation curve shapes are not independent evidence**: The outer slope of rotation curves correlates with mass (r = -0.62), but standard MOND (p=0.5) predicts this equally well (r = -0.63) from baryonic mass distributions alone. The p(M) improvement comes from the RAR *amplitude* (systematic offset), not the curve *shape*
 - **Gas-dominated test is inconclusive**: In gas-dominated galaxies (where Y_disk is irrelevant), the MOND bias-mass correlation is r = +0.25 (N=24), suggestive but not statistically significant. We cannot fully rule out that the bias is caused by Y_disk systematics rather than gravitational physics
 - M0 is uncertain by a factor of ~5 (10^10.0 to 10^10.8), depending on fitting method and cluster weighting
@@ -89,10 +89,6 @@ python run_slope_test.py            # Rotation curve shape test (slope vs mass)
 
 MIT. See [LICENSE](LICENSE).
 
-## Disclaimer
-
-This is an independent, exploratory research project by a non-academic individual. It has not been peer-reviewed or published in a scientific journal. Feedback, corrections, and independent verification are welcome via GitHub Issues.
-
 ## Cross-Validation
 
 Leave-one-out cross-validation within SPARC (171 galaxies):
@@ -103,3 +99,7 @@ Leave-one-out cross-validation within SPARC (171 galaxies):
 | **p(M) LOO** | **0.187** | **+6.0%** |
 
 The improvement is concentrated in dwarf galaxies (logM < 9: +30%), while massive galaxies show no improvement (-1.5%). This confirms that p(M) generalizes to unseen data and is not overfitting, but the effect is primarily relevant for low-mass systems.
+
+## Disclaimer
+
+This is an independent, exploratory research project by a non-academic individual. It has not been peer-reviewed or published in a scientific journal. Feedback, corrections, and independent verification are welcome via GitHub Issues.
