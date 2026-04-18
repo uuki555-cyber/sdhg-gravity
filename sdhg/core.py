@@ -15,7 +15,7 @@ MSUN = 1.989e30  # kg
 KPC = 3.086e19  # m
 
 
-def p_of_M(M_sun, M0=10**10.75):
+def p_of_M(M_sun, M0=10**10.2):
     """Compute the SDHG exponent p from baryonic mass M (in solar masses).
 
     Parameters
@@ -23,7 +23,7 @@ def p_of_M(M_sun, M0=10**10.75):
     M_sun : float or array
         Baryonic mass in solar masses.
     M0 : float
-        Transition mass in solar masses (default: 10^10.75).
+        Transition mass in solar masses (default: 10^10.2 from global fit).
 
     Returns
     -------
@@ -34,7 +34,7 @@ def p_of_M(M_sun, M0=10**10.75):
     return 2.0 * u / (1.0 + 3.0 * u)
 
 
-def mu_sdhg(x, M_sun, M0=10**10.75):
+def mu_sdhg(x, M_sun, M0=10**10.2):
     """SDHG interpolation function.
 
     Parameters
