@@ -12,7 +12,7 @@ p(M) = 2u / (1 + 3u),   u = (M / M0)^(1/3)
 
 where `x = g_bar / a0`, `M` is the baryonic mass, and `M0 ~ 10^10.2 solar masses`.
 
-For the standard McGaugh formula, `p = 0.5` for all systems. We find that `p` increases from ~0.2 for dwarf galaxies to ~0.66 for galaxy clusters, unifying their dynamics with a single formula.
+For the standard McGaugh formula, `p = 0.5` for all systems. We find that `p` increases from ~0.2 for dwarf galaxies to ~0.66 for galaxy clusters, and a single formula describes both galaxy rotation curves and cluster mass discrepancies.
 
 ![p vs mass](figures/fig2_p_vs_mass.png)
 
@@ -29,13 +29,13 @@ In a **global fit with no per-galaxy fitting** (single Y_disk for all galaxies),
 | Variable G(M) [control] | 3 | 0.188 | +4.6% |
 | **p(M) model** | **3** | **0.166** | **+15.5%** |
 
-The p(M) model improves over McGaugh by 15.5%, while a variable-G model (same number of parameters) only achieves 4.6%. The 11% difference rules out Y_disk degeneracy as the source of the signal (see [Li+ 2021 bias test](#bias-test) below).
+The p(M) model improves over McGaugh by 15.5%, while a variable-G model (same number of parameters) only achieves 4.6%. The 11% difference strongly disfavors Y_disk degeneracy as the source of the signal (see [Li+ 2021 bias test](#bias-test) below).
 
 ## Bias Test (Li+ 2021)
 
-Li, Lelli & McGaugh ([2021, A&A 653, A170](https://doi.org/10.1051/0004-6361/202040101)) showed that fitting a parameter per galaxy can create spurious mass dependence due to degeneracy with the stellar mass-to-light ratio Y_disk. We address this in three ways:
+Li, Lelli, McGaugh, Schombert & Chae ([2021, A&A 646, L13](https://doi.org/10.1051/0004-6361/202040101)) showed that fitting a parameter per galaxy can create spurious mass dependence due to degeneracy with the stellar mass-to-light ratio Y_disk. We address this in three ways:
 
-1. **Global fit (`run_global_fit.py`)**: No per-galaxy fitting at all. Single Y_disk shared by all galaxies. p(M) still improves by 15.5%, while the control model (variable G with same degrees of freedom) achieves only 4.6%. **The 11% gap cannot be an artifact.**
+1. **Global fit (`run_global_fit.py`)**: No per-galaxy fitting at all. Single Y_disk shared by all galaxies. p(M) still improves by 15.5%, while the control model (variable G with same degrees of freedom) achieves only 4.6%. **The 11% gap is unlikely to be an artifact of Y_disk degeneracy.**
 
 2. **Bayesian marginalization (`run_bayesian_test.py`)**: Marginalizing over Y_disk ~ N(0.5, 0.15) and distance ~ N(1.0, 0.10), the per-galaxy p correlation with mass (r=0.18) exceeds the G_eff control (r=0.12). Suggestive but not definitive from galaxy data alone.
 
@@ -44,7 +44,7 @@ Li, Lelli & McGaugh ([2021, A&A 653, A170](https://doi.org/10.1051/0004-6361/202
 ## Quick Start
 
 ```bash
-pip install numpy scipy
+pip install numpy scipy             # matplotlib also needed for make_figures.py
 python run_global_fit.py            # Core result (no per-galaxy fitting, bias-free)
 python run_main_analysis.py         # Detailed analysis (per-galaxy Y_disk, subject to Li+ caveat)
 python run_little_things.py         # Independent validation on dwarf galaxies
@@ -67,7 +67,9 @@ python run_bayesian_test.py         # Li+ (2021) methodology check
 
 - **Cross-validation is neutral**: Applying SPARC-trained parameters to LITTLE THINGS gives -0.8% (no improvement). This may be due to crude enclosed-mass estimates for dwarfs, but it means we cannot yet confirm that p(M) generalizes to unseen data
 - M0 is uncertain by a factor of ~5 (10^10.0 to 10^10.8), depending on fitting method and cluster weighting
+- The exponent 1/3 in the formula is approximate; the global fit gives alpha = 0.31 (6% below 1/3)
 - The functional form p(M) = 2u/(1+3u) is empirical; theoretical derivation is speculative
+- Galaxy baryonic masses are estimated as M ~ 0.5 V_flat^2 R_last / G (dynamical proxy, not photometric)
 - Large-scale structure compatibility requires cosmological extension (not addressed here)
 - **This work has not been peer-reviewed**
 
