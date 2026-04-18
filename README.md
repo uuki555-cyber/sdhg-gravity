@@ -1,8 +1,8 @@
-# SDHG: Mass-Dependent Radial Acceleration Relation
+# Mass-Dependent Radial Acceleration Relation
 
-**The exponent of the RAR interpolation function depends on galaxy mass.**
+**The exponent of the RAR interpolation function depends on baryonic mass.**
 
-This repository presents evidence that the Radial Acceleration Relation (McGaugh+ 2016) is better described by an interpolation function whose exponent varies with the baryonic mass of the system:
+This repository presents evidence that the Radial Acceleration Relation (McGaugh, Lelli & Schombert 2016) is better described by an interpolation function whose exponent varies with the baryonic mass of the system:
 
 ```
 mu(x, M) = 1 - exp(-x^p(M))
@@ -10,61 +10,68 @@ mu(x, M) = 1 - exp(-x^p(M))
 p(M) = 2u / (1 + 3u),   u = (M / M0)^(1/3)
 ```
 
-where `x = g_bar / a0`, `M` is the baryonic mass, and `M0 ~ 10^10.75 solar masses`.
+where `x = g_bar / a0`, `M` is the baryonic mass, and `M0 ~ 10^10.2 solar masses`.
 
-## Key Finding
+For the standard McGaugh formula, `p = 0.5` for all systems. We find that `p` increases from ~0.2 for dwarf galaxies to ~0.66 for galaxy clusters, unifying their dynamics with a single formula.
 
-| System | Mass (Msun) | p | Effect |
-|--------|-------------|---|--------|
-| Ultra-dwarf galaxies | 10^7 | ~0.2 | Weak modification |
-| Milky Way-class | 10^10 | ~0.5 | McGaugh-like |
-| Galaxy clusters | 10^14 | ~0.66 | Strong modification |
+## Key Result
 
-The mass dependence of `p` unifies the galaxy-scale RAR with galaxy cluster dynamics using a single formula.
+In a **global fit with no per-galaxy fitting** (single Y_disk for all galaxies), comparing models with the same number of free parameters:
 
-## Results
+| Model | Free params | RMS | vs McGaugh |
+|-------|-------------|-----|------------|
+| McGaugh (p = 0.5) | 1 | 0.197 | baseline |
+| Constant p | 2 | 0.195 | +0.9% |
+| Variable G(M) [control] | 3 | 0.188 | +4.6% |
+| **SDHG p(M)** | **3** | **0.166** | **+15.5%** |
 
-- **SPARC 175 galaxies + 17 clusters**: 25% improvement over McGaugh+ 2016 (unified RMS)
-- **LITTLE THINGS 17 dwarfs**: Independent validation, 27% improvement
-- **Ultra-dwarf prediction confirmed**: p < 0.25 for M < 10^8 (observed p = 0.17)
-- **Cluster ratio**: 0.95 +/- 0.09 (1.0 = perfect; McGaugh gives 0.65)
-- **Bayesian bias test**: Marginalizing over Y_disk and distance with Gaussian priors, p(M) remains suggestive (r=0.18) while G_eff control gives r=0.12. Galaxy-cluster difference is robust.
+The p(M) model improves over McGaugh by 15.5%, while a variable-G model (same number of parameters) only achieves 4.6%. The 11% difference rules out Y_disk degeneracy as the source of the signal (see [Li+ 2021 bias test](#bias-test) below).
+
+## Bias Test (Li+ 2021)
+
+[Li, Lelli & McGaugh (2021, A&A)](https://arxiv.org/abs/2011.00019) showed that fitting a parameter per galaxy can create spurious mass dependence. We address this in three ways:
+
+1. **Global fit (`run_global_fit.py`)**: No per-galaxy fitting at all. Single Y_disk shared by all galaxies. p(M) still improves by 15.5%, while the control model (variable G with same degrees of freedom) achieves only 4.6%. **The 11% gap cannot be an artifact.**
+
+2. **Bayesian marginalization (`run_bayesian_test.py`)**: Marginalizing over Y_disk ~ N(0.5, 0.15) and distance ~ N(1.0, 0.10), the per-galaxy p correlation with mass (r=0.18) exceeds the G_eff control (r=0.12). Suggestive but not definitive from galaxy data alone.
+
+3. **Galaxy clusters are immune**: Cluster data involves no per-galaxy fitting and independently requires p ~ 0.66, far from the galaxy-optimal p ~ 0.5.
 
 ## Quick Start
 
 ```bash
 pip install numpy scipy
-python run_main_analysis.py        # Main analysis (SPARC + clusters)
-python run_little_things.py        # Independent validation (dwarf galaxies)
-python run_bayesian_test.py        # Bias test (Li+ 2021 methodology check)
+python run_global_fit.py            # Core result (no per-galaxy fitting)
+python run_main_analysis.py         # Detailed analysis with per-galaxy Y_disk
+python run_little_things.py         # Independent validation on dwarf galaxies
+python run_bayesian_test.py         # Li+ (2021) methodology check
 ```
 
 ## Data
 
-- `data/sparc_data.mrt`: SPARC mass models (Lelli, McGaugh & Schombert 2016, AJ 152, 157)
-- `data/little_things/finalrot/`: LITTLE THINGS rotation curves (Iorio+ 2017, MNRAS 466, 4159)
-- Cluster data from Vikhlinin+ 2006 (ApJ 640, 691) and X-COP/Ettori+ 2019 (A&A 621, A39)
+- `data/sparc_data.mrt`: SPARC mass models for 175 disk galaxies (Lelli, McGaugh & Schombert 2016, AJ 152, 157)
+- `data/little_things/finalrot/`: Rotation curves for 17 dwarf irregular galaxies (Iorio+ 2017, MNRAS 466, 4159)
+- Galaxy cluster data from Vikhlinin+ 2006 (ApJ 640, 691) and X-COP/Ettori+ 2019 (A&A 621, A39), hardcoded in `sdhg/data.py`
 
-## Interpretation
+## What This Is and Is Not
 
-The exponent `p(M)` may reflect:
-- **CDT dimensional flow**: The effective spatial dimension runs from ~1 (small systems) to ~3 (large systems), with `p = (d_eff - 1) / d_eff`
-- **Superfluid dark matter**: BEC phase transition temperature depends on halo mass
-- **Scale-dependent holographic encoding**: Information transmission efficiency varies with system mass
+**This is**: An observational finding that the RAR interpolation exponent correlates with system mass, tested against methodological bias concerns.
 
-We do not claim to identify the physical mechanism. We report the observational fact that `p` depends on `M`.
+**This is not**: A new theory of gravity, a claim about dark matter, or a peer-reviewed result.
 
-## Limitations and Caveats
+## Limitations
 
-- **Li+ (2021) bias concern**: Fitting a parameter per galaxy risks spurious mass dependence due to Y_disk degeneracy. Our Bayesian test (`run_bayesian_test.py`) shows the galaxy-only signal is suggestive but not definitive (r=0.18 vs control r=0.12). The galaxy-to-cluster difference is robust.
-- `M0` is empirically determined (10^10.0 - 10^10.8 range); not yet derived from fundamental constants
-- Intrinsic scatter in per-galaxy `p` is ~0.13 (68% explained by M, 32% unexplained)
-- Large-scale structure (power spectrum shape) requires cosmological extension
-- This work has **not been peer-reviewed**
+- Cross-validation on LITTLE THINGS is neutral (-0.8%), likely due to crude enclosed-mass estimates for dwarfs
+- M0 is uncertain by a factor of ~5 (10^10.0 to 10^10.8), depending on fitting method and cluster weighting
+- The functional form p(M) = 2u/(1+3u) is empirical; theoretical derivation is speculative
+- Large-scale structure compatibility requires cosmological extension (not addressed here)
+- **This work has not been peer-reviewed**
 
-## Reproducibility
+## Related Work
 
-All results can be reproduced by running the Python scripts. The only dependencies are `numpy` and `scipy`. No proprietary data is used — SPARC data is from the public database at Case Western Reserve University.
+- **Desmond & Famaey (2024, MNRAS 530, 1781)**: Parametrized the same exponent (as delta/2 in their delta-family) but fit it as a universal constant, not mass-dependent.
+- **EMOND (Zhao & Famaey 2012)**: Makes the acceleration scale a0 potential-dependent, not the exponent.
+- **Superfluid DM (Berezhiani & Khoury 2015)**: BEC phase transition could provide a physical mechanism for mass-dependent modification.
 
 ## License
 
@@ -72,4 +79,4 @@ MIT. See [LICENSE](LICENSE).
 
 ## Disclaimer
 
-This is an exploratory, independent research project. It has not been peer-reviewed or published in a scientific journal. The results should be treated as preliminary until verified by the community. Feedback, corrections, and independent verification are welcome.
+This is an independent, exploratory research project by a non-academic individual. It has not been peer-reviewed or published in a scientific journal. Feedback, corrections, and independent verification are welcome via GitHub Issues.
