@@ -23,13 +23,13 @@ In a **global fit with no per-galaxy fitting** (single Y_disk for all galaxies),
 | McGaugh (p = 0.5) | 1 | 0.197 | baseline |
 | Constant p | 2 | 0.195 | +0.9% |
 | Variable G(M) [control] | 3 | 0.188 | +4.6% |
-| **SDHG p(M)** | **3** | **0.166** | **+15.5%** |
+| **p(M) model** | **3** | **0.166** | **+15.5%** |
 
 The p(M) model improves over McGaugh by 15.5%, while a variable-G model (same number of parameters) only achieves 4.6%. The 11% difference rules out Y_disk degeneracy as the source of the signal (see [Li+ 2021 bias test](#bias-test) below).
 
 ## Bias Test (Li+ 2021)
 
-[Li, Lelli & McGaugh (2021, A&A)](https://arxiv.org/abs/2011.00019) showed that fitting a parameter per galaxy can create spurious mass dependence. We address this in three ways:
+Li, Lelli & McGaugh (2021, A&A 653, A170) showed that fitting a parameter per galaxy can create spurious mass dependence due to degeneracy with the stellar mass-to-light ratio Y_disk. We address this in three ways:
 
 1. **Global fit (`run_global_fit.py`)**: No per-galaxy fitting at all. Single Y_disk shared by all galaxies. p(M) still improves by 15.5%, while the control model (variable G with same degrees of freedom) achieves only 4.6%. **The 11% gap cannot be an artifact.**
 
@@ -41,8 +41,8 @@ The p(M) model improves over McGaugh by 15.5%, while a variable-G model (same nu
 
 ```bash
 pip install numpy scipy
-python run_global_fit.py            # Core result (no per-galaxy fitting)
-python run_main_analysis.py         # Detailed analysis with per-galaxy Y_disk
+python run_global_fit.py            # Core result (no per-galaxy fitting, bias-free)
+python run_main_analysis.py         # Detailed analysis (per-galaxy Y_disk, subject to Li+ caveat)
 python run_little_things.py         # Independent validation on dwarf galaxies
 python run_bayesian_test.py         # Li+ (2021) methodology check
 ```
@@ -61,7 +61,7 @@ python run_bayesian_test.py         # Li+ (2021) methodology check
 
 ## Limitations
 
-- Cross-validation on LITTLE THINGS is neutral (-0.8%), likely due to crude enclosed-mass estimates for dwarfs
+- **Cross-validation is neutral**: Applying SPARC-trained parameters to LITTLE THINGS gives -0.8% (no improvement). This may be due to crude enclosed-mass estimates for dwarfs, but it means we cannot yet confirm that p(M) generalizes to unseen data
 - M0 is uncertain by a factor of ~5 (10^10.0 to 10^10.8), depending on fitting method and cluster weighting
 - The functional form p(M) = 2u/(1+3u) is empirical; theoretical derivation is speculative
 - Large-scale structure compatibility requires cosmological extension (not addressed here)
