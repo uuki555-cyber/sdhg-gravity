@@ -134,9 +134,8 @@ def main():
     gap = iA - iB
     if gap > 3:
         print(f"  RESULT: p(M) beats G(M) by {gap:.1f}%.")
-        print(f"  Li+ (2021) bias concern is CLEARED.")
-        print(f"  The mass dependence of p is a real physical signal,")
-        print(f"  not an artifact of Y_disk degeneracy.")
+        print(f"  Li+ (2021) Y_disk degeneracy is disfavored as sole explanation.")
+        print(f"  Definitive exclusion requires more gas-dominated dwarf data.")
     elif gap > 1:
         print(f"  RESULT: p(M) exceeds G(M) by {gap:.1f}%. Suggestive but not definitive.")
     else:
