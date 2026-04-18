@@ -14,6 +14,10 @@ where `x = g_bar / a0`, `M` is the baryonic mass, and `M0 ~ 10^10.2 solar masses
 
 For the standard McGaugh formula, `p = 0.5` for all systems. We find that `p` increases from ~0.2 for dwarf galaxies to ~0.66 for galaxy clusters, unifying their dynamics with a single formula.
 
+![p vs mass](figures/fig2_p_vs_mass.png)
+
+![Global fit comparison](figures/fig3_global_fit.png)
+
 ## Key Result
 
 In a **global fit with no per-galaxy fitting** (single Y_disk for all galaxies), comparing models with the same number of free parameters:
