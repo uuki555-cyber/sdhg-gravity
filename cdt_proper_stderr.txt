@@ -1,0 +1,5 @@
+Proper 2+1D CDT: L=10 T=15
+Built 9000 tetrahedra (200 spatial tri x 15 slabs x 3)
+Building dual graph... done. Total neighbor links: 30000, avg: 3.3
+Random walk: 200000 walks, sigma_max=500 on 9000 tets
+Done.

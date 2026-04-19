@@ -1,0 +1,4 @@
+CDT: L=10 T=15 sweeps=200 seed=42 target_v=150
+  sweep 100: avg_v=183
+  sweep 200: avg_v=188
+Graph: N=2828 vertices
