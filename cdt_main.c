@@ -30,6 +30,8 @@ static int n_tets_alive = 0;
 static int vt[MAX_VERTS][MAX_VT];
 static int vt_deg[MAX_VERTS];
 static int n_verts = 0;
+static int nsv_per_slice = 0;  /* spatial vertices per slice, for causality */
+static int n_time_slices = 0;
 
 /* Free list for tet reuse */
 static int free_list[MAX_TETS];
@@ -162,6 +164,16 @@ static int move_23(void) {
 
     /* Check edge (d,e) doesn't exist */
     if(edge_exists(d,e)) return 0;
+
+    /* Causality: reject if shared face is purely spacelike (all same time) */
+    if(nsv_per_slice > 0) {
+        int shared_tmp[3], sti=0;
+        for(int i=0;i<4;i++) if(i!=fi) shared_tmp[sti++]=tv[ti1][i];
+        int t0 = shared_tmp[0] < n_verts ? shared_tmp[0]/nsv_per_slice : -1;
+        int t1 = shared_tmp[1] < n_verts ? shared_tmp[1]/nsv_per_slice : -1;
+        int t2 = shared_tmp[2] < n_verts ? shared_tmp[2]/nsv_per_slice : -1;
+        if(t0>=0 && t0==t1 && t1==t2) return 0; /* all same slice = spacelike */
+    }
 
     /* Shared face vertices */
     int shared[3], si=0;
@@ -611,6 +623,8 @@ static void build_initial(SSlice*base, int T){
     n_tets_total=0; n_tets_alive=0; n_free=0;
     memset(vt_deg,0,sizeof(vt_deg));
     n_verts = nsv * T;
+    nsv_per_slice = nsv;
+    n_time_slices = T;
     next_new_vert = n_verts; /* new vertices start after existing ones */
 
     for(t=0;t<T;t++){int tn=(t+1)%T;
