@@ -152,3 +152,5 @@ All quantitative claims in this repository are reproducible from the included sc
 | 4D CDT (2,4)+(4,2)+(3,3) | d_UV=3.5-3.7, d_IR=4+ | `cdt4d.c` |
 | p_flat = (d-2)/(d-1) | 0.5 for d=3 = McGaugh | derived |
 | p_max = (d-1)/d | 2/3 for d=3 | data-exact |
+| **Independent verification** | **+25.4% on NGC4214** | `pipeline_mass_model.py` |
+| THINGS pipeline (4 galaxies) | mean +4.9% | HI + literature M_star |
