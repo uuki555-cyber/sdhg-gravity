@@ -799,6 +799,27 @@ int main(int argc,char**argv){
     fprintf(stderr,"After: tets=%d, 23=%d 32=%d 26=%d 62=%d\n",
             n_tets_alive,a23,a32,a26,a62);
 
+    /* Volume profile V(t): count alive tets per time slab */
+    {
+        int nsv = base.n_vert;
+        int T_slices = T;
+        fprintf(stderr, "Volume profile V(t):\n");
+        for(int t=0; t<T_slices; t++){
+            int count = 0;
+            for(int ti=0; ti<n_tets_total; ti++){
+                if(!ta[ti]) continue;
+                /* Check if any vertex is in time slice t */
+                int in_t = 0;
+                for(int k=0; k<4; k++){
+                    int v = tv[ti][k];
+                    if(v >= t*nsv && v < (t+1)*nsv) { in_t=1; break; }
+                }
+                if(in_t) count++;
+            }
+            fprintf(stderr, "  t=%d V=%d\n", t, count);
+        }
+    }
+
     fprintf(stderr,"Random walk (%d)...\n",nw);
     measure_dspec(nw,smax);
 
