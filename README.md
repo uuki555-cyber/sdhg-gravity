@@ -56,13 +56,27 @@ python run_slope_test.py            # Rotation curve shape test (slope vs mass)
 python run_loo_cv.py               # Leave-one-out cross-validation (slow)
 python run_model_comparison.py     # BIC/AIC model selection (dBIC=38.4 vs McGaugh)
 python run_baryonic_mass_fit.py    # Baryonic vs dynamical mass comparison
-python run_cdt_2plus1d.py          # 2+1D CDT simulation (~30 min)
+python run_cdt_2plus1d.py          # 2+1D CDT simulation (~30 min, Python reference)
+python cdt_pachner.py              # 2+1D CDT with Pachner moves (Python)
+# C CDT (compile first: cl /O2 /std:c11 /Fe:cdt_main.exe cdt_main.c)
+# ./cdt_main.exe 20 30 5000 200000 1000000 300 5 1 42
+# ./cdt4d.exe 8 12 2000000 400 42 200000 5 1   # 4D CDT
 ```
 
 ## Data
 
 - `data/sparc_data.mrt`: SPARC mass models for 175 disk galaxies (Lelli, McGaugh & Schombert 2016, AJ 152, 157)
 - `data/little_things/finalrot/`: Rotation curves for 17 dwarf irregular galaxies (Iorio+ 2017, MNRAS 466, 4159)
+
+## CDT Code
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `cdt_main.c` | 2+1D CDT, all 4 Pachner moves + Regge action | **Production** |
+| `cdt4d.c` | 3+1D CDT, (2,4)+(4,2) moves | **Production** |
+| `cdt_pachner.py` | 2+1D CDT Python prototype | **Reference** |
+| `run_cdt_2plus1d.py` | Original pure-Python CDT | **Legacy** |
+| `cdt_sim.c`, `cdt_full.c`, `cdt_large.c`, `cdt_proper.c`, `cdt_fast.py` | Development artifacts | **Archived** |
 - Galaxy cluster data from Vikhlinin+ 2006 (ApJ 640, 691) and X-COP/Ettori+ 2019 (A&A 621, A39), hardcoded in `sdhg/data.py`
 
 ## What This Is and Is Not
