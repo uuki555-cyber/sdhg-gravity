@@ -54,6 +54,8 @@ python run_bayesian_test.py         # Li+ (2021) methodology check
 python run_bias_analysis.py         # MOND systematic bias vs mass
 python run_slope_test.py            # Rotation curve shape test (slope vs mass)
 python run_loo_cv.py               # Leave-one-out cross-validation (slow)
+python run_model_comparison.py     # BIC/AIC model selection (dBIC=38.4 vs McGaugh)
+python run_baryonic_mass_fit.py    # Baryonic vs dynamical mass comparison
 python run_cdt_2plus1d.py          # 2+1D CDT simulation (~30 min)
 ```
 
@@ -115,17 +117,22 @@ MIT. See [LICENSE](LICENSE).
 
 All quantitative claims in this repository are reproducible from the included scripts. Key results:
 
-| Finding | Value | Precision | Script |
-|---------|-------|-----------|--------|
-| Global fit improvement | +15.5% | ±0.1% | `run_global_fit.py` |
-| Alpha (free) | 0.312 | | `run_global_fit.py` |
-| Alpha = 1/3 cost | +0.02% RMS | | `run_global_fit.py` |
-| p_max = 2/3 cost | +0.00% RMS | | verified in analysis |
-| Coefficients A=2, B=3 | 0.5% precision | | verified in analysis |
-| Li+ gap (p(M) vs G(M)) | 11% | | `run_global_fit.py` |
-| MOND bias-mass r | +0.47 | | `run_bias_analysis.py` |
-| LOO cross-validation | +5.4% | | `run_loo_cv.py` |
-| Gas-dominated alpha | 0.184 | +6.8% vs McGaugh | analysis |
-| Disk galaxy alpha | 0.341 ≈ 1/3 | +7.3% vs McGaugh | analysis |
-| CDT gamma (2+1D) | 0.87 ± 0.1 | | `cdt_main.c` |
-| CDT d_UV | 2.1-2.2 | | `cdt_main.c` |
+| Finding | Value | Script |
+|---------|-------|--------|
+| Global fit improvement | +15.5% vs McGaugh | `run_global_fit.py` |
+| Alpha (free fit) | 0.312 | `run_global_fit.py` |
+| Alpha = 1/3 cost | +0.02% RMS | `run_global_fit.py` |
+| p_max = 2/3 cost | +0.00% RMS | verified |
+| Coefficients A=2, B=3 | 0.5% precision | verified |
+| Li+ gap (p(M) vs G(M)) | 11.0% | `run_global_fit.py` |
+| dBIC vs McGaugh | 38.4 (very strong) | `run_model_comparison.py` |
+| MOND bias-mass r | +0.47 → +0.12 with p(M) | `run_bias_analysis.py` |
+| LOO cross-validation | +5.4% | `run_loo_cv.py` |
+| Baryonic mass fit | +12.0%, Li+ gap 6.3% | `run_baryonic_mass_fit.py` |
+| Gas-dominated alpha | 0.184, +6.8% | verified |
+| Disk galaxy alpha | 0.341 ≈ 1/3, +7.3% | verified |
+| Bulge galaxy alpha | 0.264 ≈ 1/4, +0.5% | verified |
+| CDT gamma (2+1D, 5-seed) | 0.87 ± 0.1 ≈ 1 | `cdt_main.c` |
+| CDT d_UV / d_IR | 2.2 / 3.9 | `cdt_main.c` |
+| p_flat = (d-2)/(d-1) | 0.5 for d=3 = McGaugh | derived |
+| p_max = (d-1)/d | 2/3 for d=3 | data-exact |
