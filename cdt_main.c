@@ -15,9 +15,9 @@
 #include <string.h>
 #include <math.h>
 
-#define MAX_TETS  600000
-#define MAX_VERTS 100000
-#define MAX_VT    60   /* max tets per vertex */
+#define MAX_TETS  10000000
+#define MAX_VERTS 2000000
+#define MAX_VT    60
 
 /* Tet storage */
 static int tv[MAX_TETS][4];      /* sorted vertices */
@@ -305,11 +305,11 @@ static int move_32(void) {
 /* ============================================================
  * Spatial triangulation + initial tets (same as cdt_large.c)
  * ============================================================ */
-#define MAX_STRI 5000
-#define MAX_SDEG 25
+#define MAX_STRI 25000
+#define MAX_SDEG 30
 typedef struct {
     int tri[MAX_STRI][3]; int n_tri, n_vert, L;
-    int svt[2000][MAX_SDEG]; int svt_deg[2000];
+    int svt[12000][MAX_SDEG]; int svt_deg[12000];
 } SSlice;
 
 static void sort3(int*a,int*b,int*c){int t;
@@ -479,7 +479,10 @@ int main(int argc,char**argv){
     fprintf(stderr,"CDT: L=%d T=%d sflip=%d pachner=%d walks=%d k0=%.2f k3=%.2f\n",
             L,T,n_sflip,n_pachner,nw,k0,k3);
 
-    SSlice base; init_ss(&base,L);
+    SSlice *basep = (SSlice*)calloc(1,sizeof(SSlice));
+    if(!basep){fprintf(stderr,"SSlice alloc failed\n");return 1;}
+    #define base (*basep)
+    init_ss(&base,L);
     fprintf(stderr,"Spatial flips...");
     int acc=0; for(int i=0;i<n_sflip;i++)acc+=flip_ss(&base);
     fprintf(stderr," %d/%d\n",acc,n_sflip);
