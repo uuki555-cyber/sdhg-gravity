@@ -454,17 +454,30 @@ int main(int argc, char **argv) {
                 printf("%d %d\n", gid_offset[t] + i, gid_offset[tn] + i);
         }
 
-        /* Diagonal temporal: connect vertex i to i±1 in next slice */
-        {   int n_link2 = n_alive_v[t] < n_alive_v[tn] ?
-                          n_alive_v[t] : n_alive_v[tn];
-        for (i = 0; i < n_link2 - 1; i++) {
-            int ga = gid_offset[t] + i;
-            int gb = gid_offset[tn] + i + 1;
-            printf("%d %d\n", ga, gb);
-            ga = gid_offset[t] + i + 1;
-            gb = gid_offset[tn] + i;
-            printf("%d %d\n", ga, gb);
-        }
+        /* CDT (2,2) diagonal: for each spatial edge (a,b),
+           cross-connect a_t<->b_{t+1} and b_t<->a_{t+1} */
+        for (ti = 0; ti < slices[t].n_tri; ti++) {
+            if (slices[t].tri[ti][0] < 0) continue;
+            for (k = 0; k < 3; k++) {
+                int va = slices[t].tri[ti][k];
+                int vb = slices[t].tri[ti][(k+1)%3];
+                if (va > vb) continue;
+                int ga_t=-1, gb_t=-1, ga_tn=-1, gb_tn=-1;
+                {int lo=0,hi=n_alive_v[t]-1; while(lo<=hi){int mid=(lo+hi)/2;
+                 if(alive_v[t][mid]==va){ga_t=gid_offset[t]+mid;break;}
+                 else if(alive_v[t][mid]<va)lo=mid+1;else hi=mid-1;}}
+                {int lo=0,hi=n_alive_v[t]-1; while(lo<=hi){int mid=(lo+hi)/2;
+                 if(alive_v[t][mid]==vb){gb_t=gid_offset[t]+mid;break;}
+                 else if(alive_v[t][mid]<vb)lo=mid+1;else hi=mid-1;}}
+                {int lo=0,hi=n_alive_v[tn]-1; while(lo<=hi){int mid=(lo+hi)/2;
+                 if(alive_v[tn][mid]==va){ga_tn=gid_offset[tn]+mid;break;}
+                 else if(alive_v[tn][mid]<va)lo=mid+1;else hi=mid-1;}}
+                {int lo=0,hi=n_alive_v[tn]-1; while(lo<=hi){int mid=(lo+hi)/2;
+                 if(alive_v[tn][mid]==vb){gb_tn=gid_offset[tn]+mid;break;}
+                 else if(alive_v[tn][mid]<vb)lo=mid+1;else hi=mid-1;}}
+                if(ga_t>=0 && gb_tn>=0) printf("%d %d\n", ga_t, gb_tn);
+                if(gb_t>=0 && ga_tn>=0) printf("%d %d\n", gb_t, ga_tn);
+            }
         }
     }
 
