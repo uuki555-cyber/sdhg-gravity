@@ -213,6 +213,7 @@ static void measure_dspec_4d(int n_walks, int sigma_max) {
 
     for(int i=0; i<n_walks; i++) {
         int start = rand() % n_4sim;
+        if(sim5[start][0] < 0) continue; /* skip dead */
         int nc=0;
         for(int k=0;k<5;k++) if(sim5_nb[start][k]>=0) nc++;
         if(nc==0) continue;
@@ -277,15 +278,135 @@ int main(int argc, char **argv) {
     double k4_val = (argc>=9) ? atof(argv[8]) : 0;
 
     if(n_pachner > 0) {
-        fprintf(stderr, "Pachner (2,4) moves (%d, k0=%.1f, k4=%.1f)...\n",
+        fprintf(stderr, "Pachner moves (%d, k0=%.1f, k4=%.1f)...\n",
                 n_pachner, k0_val, k4_val);
         int acc24=0, acc42=0;
         int target = n_4sim;
 
         for(int iter=0; iter<n_pachner; iter++) {
-            /* (2,4): pick random 4-simplex, pick random face (tet),
-               find neighbor, check new edge doesn't exist */
+            /* Choose move type */
+            int do_24 = (rand()%2 == 0);
+
+            if(!do_24) {
+                /* ============ (4,2) move ============ */
+                /* Pick random simplex, random edge, find 4 simplices sharing it */
+                int si0 = rand() % n_4sim;
+                int edges[10][2]={{0,1},{0,2},{0,3},{0,4},{1,2},{1,3},{1,4},{2,3},{2,4},{3,4}};
+                int ei = rand() % 10;
+                int e1 = sim5[si0][edges[ei][0]], e2 = sim5[si0][edges[ei][1]];
+
+                /* Find all simplices sharing edge (e1,e2) */
+                int ring[10]; int nr=0;
+                for(int s=0; s<n_4sim && nr<10; s++){
+                    int h1=0,h2=0;
+                    for(int k=0;k<5;k++){
+                        if(sim5[s][k]==e1) h1=1;
+                        if(sim5[s][k]==e2) h2=1;
+                    }
+                    if(h1&&h2) ring[nr++]=s;
+                }
+                if(nr != 4) continue;
+
+                /* Collect other vertices (should be exactly 4: a,b,c,d) */
+                int others[10]; int no=0;
+                for(int i=0;i<4;i++)
+                    for(int k=0;k<5;k++){
+                        int v=sim5[ring[i]][k];
+                        if(v==e1||v==e2) continue;
+                        int dup=0;
+                        for(int j=0;j<no;j++) if(others[j]==v){dup=1;break;}
+                        if(!dup && no<10) others[no++]=v;
+                    }
+                if(no!=4) continue;
+
+                /* Sort others */
+                for(int i=0;i<3;i++) for(int j=i+1;j<4;j++)
+                    if(others[i]>others[j]){int t=others[i];others[i]=others[j];others[j]=t;}
+                int a=others[0],b=others[1],c=others[2],d=others[3];
+
+                /* Volume control */
+                if(n_4sim < target*0.7) continue;
+
+                /* Metropolis: dS = -2*k4 (removing 2 simplices) */
+                double dS = -2*k4_val;
+                if(dS>0 && (double)rand()/RAND_MAX >= exp(-dS)) continue;
+
+                /* Identify T1=(a,b,c,e1,e2), T2=(a,b,d,...), T3=(a,c,d,...), T4=(b,c,d,...) */
+                int t1=-1,t2=-1,t3=-1,t4=-1;
+                for(int i=0;i<4;i++){
+                    int si=ring[i];
+                    int ha=0,hb=0,hc=0,hd=0;
+                    for(int k=0;k<5;k++){
+                        if(sim5[si][k]==a)ha=1; if(sim5[si][k]==b)hb=1;
+                        if(sim5[si][k]==c)hc=1; if(sim5[si][k]==d)hd=1;
+                    }
+                    if(ha&&hb&&hc&&!hd) t1=si;
+                    if(ha&&hb&&!hc&&hd) t2=si;
+                    if(ha&&!hb&&hc&&hd) t3=si;
+                    if(!ha&&hb&&hc&&hd) t4=si;
+                }
+                if(t1<0||t2<0||t3<0||t4<0) continue;
+
+                /* Save external neighbors */
+                int nb_abce1=sim5_nb[t1][fidx(t1,e2)]; /* T1 face opp e2 */
+                int nb_abce2=sim5_nb[t1][fidx(t1,e1)]; /* T1 face opp e1 */
+                int nb_abde1=sim5_nb[t2][fidx(t2,e2)];
+                int nb_abde2=sim5_nb[t2][fidx(t2,e1)];
+                int nb_acde1=sim5_nb[t3][fidx(t3,e2)];
+                int nb_acde2=sim5_nb[t3][fidx(t3,e1)];
+                int nb_bcde1=sim5_nb[t4][fidx(t4,e2)];
+                int nb_bcde2=sim5_nb[t4][fidx(t4,e1)];
+
+                /* Replace: 4 simplices -> 2 */
+                /* S1=(a,b,c,d,e1), S2=(a,b,c,d,e2) */
+                int s1v[5]={a,b,c,d,e1}; sort5(s1v);
+                int s2v[5]={a,b,c,d,e2}; sort5(s2v);
+
+                /* Reuse t1 and t2 slots, mark t3 and t4 as dead */
+                memcpy(sim5[t1], s1v, 5*sizeof(int));
+                memcpy(sim5[t2], s2v, 5*sizeof(int));
+                /* Mark t3, t4 dead (set all vertices to -1) */
+                for(int k=0;k<5;k++){sim5[t3][k]=-1;sim5[t4][k]=-1;}
+                for(int k=0;k<5;k++){sim5_nb[t3][k]=-1;sim5_nb[t4][k]=-1;}
+                /* Note: n_4sim doesn't decrease (dead slots remain) */
+
+                /* Internal: S1 ↔ S2 via shared face (a,b,c,d) */
+                set_nb5(t1,e1,t2); set_nb5(t2,e2,t1);
+
+                /* External */
+                /* S1 opp d = (a,b,c,e1) ← nb_abce1 */
+                set_nb5(t1,d,nb_abce1);
+                if(nb_abce1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abce1][j]==t1||sim5_nb[nb_abce1][j]==t2||sim5_nb[nb_abce1][j]==t3||sim5_nb[nb_abce1][j]==t4){sim5_nb[nb_abce1][j]=t1;break;}}
+                /* S1 opp c = (a,b,d,e1) ← nb_abde1 */
+                set_nb5(t1,c,nb_abde1);
+                if(nb_abde1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abde1][j]==t1||sim5_nb[nb_abde1][j]==t2||sim5_nb[nb_abde1][j]==t3||sim5_nb[nb_abde1][j]==t4){sim5_nb[nb_abde1][j]=t1;break;}}
+                /* S1 opp b = (a,c,d,e1) ← nb_acde1 */
+                set_nb5(t1,b,nb_acde1);
+                if(nb_acde1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_acde1][j]==t1||sim5_nb[nb_acde1][j]==t2||sim5_nb[nb_acde1][j]==t3||sim5_nb[nb_acde1][j]==t4){sim5_nb[nb_acde1][j]=t1;break;}}
+                /* S1 opp a = (b,c,d,e1) ← nb_bcde1 */
+                set_nb5(t1,a,nb_bcde1);
+                if(nb_bcde1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_bcde1][j]==t1||sim5_nb[nb_bcde1][j]==t2||sim5_nb[nb_bcde1][j]==t3||sim5_nb[nb_bcde1][j]==t4){sim5_nb[nb_bcde1][j]=t1;break;}}
+
+                /* S2 opp d = (a,b,c,e2) ← nb_abce2 */
+                set_nb5(t2,d,nb_abce2);
+                if(nb_abce2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abce2][j]==t1||sim5_nb[nb_abce2][j]==t2||sim5_nb[nb_abce2][j]==t3||sim5_nb[nb_abce2][j]==t4){sim5_nb[nb_abce2][j]=t2;break;}}
+                /* S2 opp c = (a,b,d,e2) ← nb_abde2 */
+                set_nb5(t2,c,nb_abde2);
+                if(nb_abde2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abde2][j]==t1||sim5_nb[nb_abde2][j]==t2||sim5_nb[nb_abde2][j]==t3||sim5_nb[nb_abde2][j]==t4){sim5_nb[nb_abde2][j]=t2;break;}}
+                /* S2 opp b = (a,c,d,e2) ← nb_acde2 */
+                set_nb5(t2,b,nb_acde2);
+                if(nb_acde2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_acde2][j]==t1||sim5_nb[nb_acde2][j]==t2||sim5_nb[nb_acde2][j]==t3||sim5_nb[nb_acde2][j]==t4){sim5_nb[nb_acde2][j]=t2;break;}}
+                /* S2 opp a = (b,c,d,e2) ← nb_bcde2 */
+                set_nb5(t2,a,nb_bcde2);
+                if(nb_bcde2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_bcde2][j]==t1||sim5_nb[nb_bcde2][j]==t2||sim5_nb[nb_bcde2][j]==t3||sim5_nb[nb_bcde2][j]==t4){sim5_nb[nb_bcde2][j]=t2;break;}}
+
+                acc42++;
+                continue;
+            }
+
+            /* ============ (2,4) move ============ */
             int si1 = rand() % n_4sim;
+            if(sim5[si1][0] < 0) continue; /* skip dead */
             int fi = rand() % 5;
             int si2 = sim5_nb[si1][fi];
             if(si2 < 0) continue;
