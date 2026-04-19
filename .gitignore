@@ -9,3 +9,9 @@ cdt_*stderr.txt
 cdt_*err.txt
 cdt_out.txt
 trigger
+
+data/cifar10/
+data/mnist/
+data/shakespeare.txt
+weibact_gpu_log.txt
+weibact_results.json
