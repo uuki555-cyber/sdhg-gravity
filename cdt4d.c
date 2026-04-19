@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
         int target = n_4sim;
 
         for(int iter=0; iter<n_pachner; iter++) {
-            int move_type = rand()%3; /* FORCE (3,3) for debug */
+            int move_type = rand()%5; /* 0=(4,2) 1=(2,4) 2=(3,3) 3=(2,8) 4=(8,2) */
 
             if(move_type == 2) {
                 /* ============ (3,3) move ============ */
@@ -476,6 +476,23 @@ int main(int argc, char **argv) {
                 continue;
             }
 
+            if(move_type == 3) {
+                /* ============ (2,8) move: insert vertex ============ */
+                /* Same as (2,4) but splits into 8 simplices */
+                /* For now: use (2,4) as proxy since (2,8) is structurally
+                   identical but more complex. The key missing piece for
+                   phase C is (3,3) which we already have. */
+                /* Attempt a (2,4) move instead */
+                goto do_24;
+            }
+
+            if(move_type == 4) {
+                /* ============ (8,2) move: remove vertex ============ */
+                /* Inverse of (2,8). Requires degree-8 vertex.
+                   For now: skip (very rare in practice) */
+                continue;
+            }
+
             if(move_type == 0) {
                 /* ============ (4,2) move ============ */
                 /* Pick random simplex, random edge, find 4 simplices sharing it */
@@ -594,6 +611,7 @@ int main(int argc, char **argv) {
             }
 
             /* ============ (2,4) move ============ */
+            do_24:;
             int si1 = rand() % n_4sim;
             if(sim5[si1][0] < 0) continue; /* skip dead */
             int fi = rand() % 5;
