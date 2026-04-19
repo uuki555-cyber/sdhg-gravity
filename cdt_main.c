@@ -303,6 +303,254 @@ static int move_32(void) {
 }
 
 /* ============================================================
+ * (2,6) Pachner move: insert vertex into shared face
+ * 2 tets -> 6 tets, N0 += 1, N3 += 4
+ * ============================================================ */
+static int next_new_vert = 0; /* set in build_initial */
+
+static int move_26(void) {
+    int ti1, attempts=0;
+    do { ti1=rand()%n_tets_total; } while(!ta[ti1] && ++attempts<100);
+    if(!ta[ti1]) return 0;
+
+    int fi = rand()%4;
+    int ti2 = tn[ti1][fi];
+    if(ti2<0 || !ta[ti2]) return 0;
+
+    /* Shared face vertices */
+    int d = tv[ti1][fi];
+    int e = -1;
+    for(int i=0;i<4;i++){
+        int v=tv[ti2][i], found=0;
+        for(int j=0;j<4;j++) if(j!=fi && tv[ti1][j]==v){found=1;break;}
+        if(!found){e=v;break;}
+    }
+    if(e<0) return 0;
+
+    int shared[3], si=0;
+    for(int i=0;i<4;i++) if(i!=fi) shared[si++]=tv[ti1][i];
+    int a=shared[0], b=shared[1], c=shared[2];
+
+    /* New vertex */
+    int v_new = next_new_vert++;
+    if(v_new >= MAX_VERTS) return 0;
+    vt_deg[v_new] = 0;
+
+    /* Save neighbors */
+    int nb_abd = get_nb(ti1, c);
+    int nb_acd = get_nb(ti1, b);
+    int nb_bcd = get_nb(ti1, a);
+    int nb_abe = get_nb(ti2, c);
+    int nb_ace = get_nb(ti2, b);
+    int nb_bce = get_nb(ti2, a);
+
+    remove_tet(ti1);
+    remove_tet(ti2);
+
+    /* 6 new tets */
+    int t1 = add_tet(a,b,v_new,d);  /* d-side */
+    int t2 = add_tet(b,c,v_new,d);
+    int t3 = add_tet(a,c,v_new,d);
+    int t4 = add_tet(a,b,v_new,e);  /* e-side */
+    int t5 = add_tet(b,c,v_new,e);
+    int t6 = add_tet(a,c,v_new,e);
+
+    /* Internal: d-side ring */
+    set_nb(t1, c, t2); set_nb(t2, a, t1);  /* t1<->t2 via (b,v,d) */
+    set_nb(t2, b, t3); set_nb(t3, a, t2);  /* t2<->t3 via ... hmm */
+
+    /* Actually, be more careful:
+       t1=(a,b,v,d): face opp c? No, c isn't in t1.
+       t1 has vertices {a,b,v_new,d} sorted. Faces:
+         opp smallest: {rest} etc.
+       Need to find which face connects to which.
+
+       t1=(a,b,v,d) and t2=(b,c,v,d) share face {b,v,d}.
+       In t1, face {b,v,d} is opposite a. In t2, face {b,v,d} is opposite c.
+    */
+    set_nb(t1, a, t2); set_nb(t2, c, t1);  /* {b,v,d} */
+    set_nb(t2, a, t3); set_nb(t3, b, t2);  /* {c,v,d} */
+    set_nb(t3, c, t1); set_nb(t1, b, t3);  /* {a,v,d} */
+
+    /* e-side ring */
+    set_nb(t4, a, t5); set_nb(t5, c, t4);  /* {b,v,e} */
+    set_nb(t5, a, t6); set_nb(t6, b, t5);  /* {c,v,e} */
+    set_nb(t6, c, t4); set_nb(t4, b, t6);  /* {a,v,e} */
+
+    /* Cross d-e: t1<->t4 via {a,b,v}, t2<->t5 via {b,c,v}, t3<->t6 via {a,c,v} */
+    set_nb(t1, d, t4); set_nb(t4, e, t1);
+    set_nb(t2, d, t5); set_nb(t5, e, t2);
+    set_nb(t3, d, t6); set_nb(t6, e, t3);
+
+    /* External */
+    set_nb(t1, v_new, nb_abd); redirect_nb(nb_abd, ti1, t1);
+    set_nb(t2, v_new, nb_bcd); redirect_nb(nb_bcd, ti1, t2);
+    set_nb(t3, v_new, nb_acd); redirect_nb(nb_acd, ti1, t3);
+    set_nb(t4, v_new, nb_abe); redirect_nb(nb_abe, ti2, t4);
+    set_nb(t5, v_new, nb_bce); redirect_nb(nb_bce, ti2, t5);
+    set_nb(t6, v_new, nb_ace); redirect_nb(nb_ace, ti2, t6);
+
+    return 1;
+}
+
+/* ============================================================
+ * (6,2) Pachner move: remove degree-6 vertex
+ * 6 tets -> 2 tets, N0 -= 1, N3 -= 4
+ * ============================================================ */
+static int move_62(void) {
+    /* Pick random tet, pick a vertex, check if degree 6 */
+    int ti1, attempts=0;
+    do { ti1=rand()%n_tets_total; } while(!ta[ti1] && ++attempts<100);
+    if(!ta[ti1]) return 0;
+
+    int vi = rand()%4;
+    int v = tv[ti1][vi];
+    if(vt_deg[v] != 6) return 0;
+
+    /* Collect all 6 tets containing v */
+    int ring[6]; int nr=0;
+    for(int i=0;i<vt_deg[v] && nr<6;i++){
+        int ti=vt[v][i];
+        if(ta[ti]) ring[nr++]=ti;
+    }
+    if(nr!=6) return 0;
+
+    /* Collect other vertices: should be exactly 5 (a,b,c,d,e) */
+    int others[10]; int n_oth=0;
+    for(int i=0;i<6;i++){
+        for(int j=0;j<4;j++){
+            int u=tv[ring[i]][j];
+            if(u==v) continue;
+            int dup=0;
+            for(int k=0;k<n_oth;k++) if(others[k]==u){dup=1;break;}
+            if(!dup && n_oth<10) others[n_oth++]=u;
+        }
+    }
+    if(n_oth!=5) return 0;
+
+    /* The 5 vertices should form: 3 in the shared face (a,b,c) + 2 opposite (d,e).
+       d and e are NOT connected to each other (they're on opposite sides).
+       The shared face (a,b,c) is the face where v was inserted. */
+
+    /* Find d and e: they don't share any tet with each other (except through v) */
+    int d=-1, e=-1;
+    for(int i=0;i<5;i++){
+        for(int j=i+1;j<5;j++){
+            /* Check if others[i] and others[j] are NOT in any tet together
+               (among the 6 ring tets, excluding v). Actually they should NOT
+               share an edge in the remaining graph. */
+            int share=0;
+            for(int k=0;k<6;k++){
+                int has_i=0, has_j=0;
+                for(int m=0;m<4;m++){
+                    if(tv[ring[k]][m]==others[i]) has_i=1;
+                    if(tv[ring[k]][m]==others[j]) has_j=1;
+                }
+                if(has_i && has_j) share++;
+            }
+            if(share==0){
+                d=others[i]; e=others[j]; break;
+            }
+        }
+        if(d>=0) break;
+    }
+    if(d<0||e<0) return 0;
+
+    /* a,b,c = others minus d,e */
+    int abc[3]; int ni=0;
+    for(int i=0;i<5;i++)
+        if(others[i]!=d && others[i]!=e && ni<3)
+            abc[ni++]=others[i];
+    if(ni!=3) return 0;
+    int a=abc[0],b=abc[1],c=abc[2];
+
+    /* Save external neighbors (faces NOT containing v) */
+    /* Each of the 6 tets has one face without v = external face */
+    int nb_abd=-1,nb_bcd=-1,nb_acd=-1,nb_abe=-1,nb_bce=-1,nb_ace=-1;
+    for(int i=0;i<6;i++){
+        int ti=ring[i];
+        int has_d=0,has_e=0;
+        for(int j=0;j<4;j++){
+            if(tv[ti][j]==d)has_d=1;
+            if(tv[ti][j]==e)has_e=1;
+        }
+        int ext_nb = get_nb(ti, v);
+        /* Identify which external face */
+        int has[5]={0,0,0,0,0};
+        for(int j=0;j<4;j++){
+            int u=tv[ti][j]; if(u==v) continue;
+            if(u==a) has[0]=1;
+            if(u==b) has[1]=1;
+            if(u==c) has[2]=1;
+            if(u==d) has[3]=1;
+            if(u==e) has[4]=1;
+        }
+        if(has[0]&&has[1]&&has[3]) nb_abd=ext_nb;
+        if(has[1]&&has[2]&&has[3]) nb_bcd=ext_nb;
+        if(has[0]&&has[2]&&has[3]) nb_acd=ext_nb;
+        if(has[0]&&has[1]&&has[4]) nb_abe=ext_nb;
+        if(has[1]&&has[2]&&has[4]) nb_bce=ext_nb;
+        if(has[0]&&has[2]&&has[4]) nb_ace=ext_nb;
+    }
+
+    /* Remove 6 tets */
+    for(int i=0;i<6;i++) remove_tet(ring[i]);
+
+    /* Add 2 tets */
+    int ti_new1 = add_tet(a,b,c,d);
+    int ti_new2 = add_tet(a,b,c,e);
+
+    /* Internal: shared face (a,b,c) */
+    set_nb(ti_new1, d, ti_new2);
+    set_nb(ti_new2, e, ti_new1);
+
+    /* External */
+    set_nb(ti_new1, c, nb_abd); redirect_nb(nb_abd, -2, ti_new1);
+    set_nb(ti_new1, b, nb_acd); redirect_nb(nb_acd, -2, ti_new1);
+    set_nb(ti_new1, a, nb_bcd); redirect_nb(nb_bcd, -2, ti_new1);
+    set_nb(ti_new2, c, nb_abe); redirect_nb(nb_abe, -2, ti_new2);
+    set_nb(ti_new2, b, nb_ace); redirect_nb(nb_ace, -2, ti_new2);
+    set_nb(ti_new2, a, nb_bce); redirect_nb(nb_bce, -2, ti_new2);
+
+    /* Fix redirect: old tet IDs are in ring[], not -2 */
+    /* Actually redirect_nb searches for old_ti in neighbor's list.
+       Since we already removed ring[], those IDs are gone.
+       But the ext neighbors still point to the old ring IDs.
+       We need to fix them. */
+    for(int i=0;i<4;i++){
+        if(tn[ti_new1][i]>=0 && tn[ti_new1][i]!=ti_new2){
+            int nb=tn[ti_new1][i];
+            /* Find which slot of nb pointed to a ring tet */
+            for(int j=0;j<4;j++){
+                for(int k=0;k<6;k++){
+                    if(tn[nb][j]==ring[k]){
+                        tn[nb][j]=ti_new1;
+                        goto fixed1;
+                    }
+                }
+            }
+            fixed1:;
+        }
+    }
+    for(int i=0;i<4;i++){
+        if(tn[ti_new2][i]>=0 && tn[ti_new2][i]!=ti_new1){
+            int nb=tn[ti_new2][i];
+            for(int j=0;j<4;j++){
+                for(int k=0;k<6;k++){
+                    if(tn[nb][j]==ring[k]){
+                        tn[nb][j]=ti_new2;
+                        goto fixed2;
+                    }
+                }
+            }
+            fixed2:;
+        }
+    }
+
+    return 1;
+}
+
+/* ============================================================
  * Spatial triangulation + initial tets (same as cdt_large.c)
  * ============================================================ */
 #define MAX_STRI 25000
@@ -363,6 +611,7 @@ static void build_initial(SSlice*base, int T){
     n_tets_total=0; n_tets_alive=0; n_free=0;
     memset(vt_deg,0,sizeof(vt_deg));
     n_verts = nsv * T;
+    next_new_vert = n_verts; /* new vertices start after existing ones */
 
     for(t=0;t<T;t++){int tn=(t+1)%T;
         for(ti=0;ti<base->n_tri;ti++){
@@ -490,31 +739,51 @@ int main(int argc,char**argv){
     fprintf(stderr,"Building initial spacetime...\n");
     build_initial(&base,T);
 
-    /* Pachner moves with Regge action */
-    fprintf(stderr,"Pachner moves (%d)...\n",n_pachner);
-    int a23=0,a32=0;
-    int target=n_tets_alive;
+    /* Pachner moves with Regge action S = -k0*N0 + k3*N3 */
+    fprintf(stderr,"Pachner moves (%d), k0=%.2f k3=%.2f...\n",n_pachner,k0,k3);
+    int a23=0,a32=0,a26=0,a62=0;
+    int target_n3=n_tets_alive;
     for(int i=0;i<n_pachner;i++){
         int nt=n_tets_alive;
-        /* Volume control + Regge action */
         double dS;
-        if(rand()%2==0){
-            /* (2,3): N3 += 1 */
+        int move_type = rand()%4;
+
+        /* Regge action: S = -k0*N0 + k3*N3
+           dS = -k0*dN0 + k3*dN3
+           Accept with prob min(1, exp(-dS)) */
+        switch(move_type){
+        case 0: /* (2,3): dN0=0, dN3=+1 → dS = k3 */
             dS = k3;
-            if(nt>target*1.15) continue; /* hard cap */
+            if(nt>target_n3*1.3) break;
             if(dS<=0 || (double)rand()/RAND_MAX < exp(-dS))
                 a23 += move_23();
-        } else {
-            /* (3,2): N3 -= 1 */
+            break;
+        case 1: /* (3,2): dN0=0, dN3=-1 → dS = -k3 */
             dS = -k3;
-            if(nt<target*0.85) continue;
+            if(nt<target_n3*0.7) break;
             if(dS<=0 || (double)rand()/RAND_MAX < exp(-dS))
                 a32 += move_32();
+            break;
+        case 2: /* (2,6): dN0=+1, dN3=+4 → dS = -k0 + 4*k3 */
+            dS = -k0 + 4*k3;
+            if(nt>target_n3*1.3) break;
+            if(dS<=0 || (double)rand()/RAND_MAX < exp(-dS))
+                a26 += move_26();
+            break;
+        case 3: /* (6,2): dN0=-1, dN3=-4 → dS = k0 - 4*k3 */
+            dS = k0 - 4*k3;
+            if(nt<target_n3*0.7) break;
+            if(dS<=0 || (double)rand()/RAND_MAX < exp(-dS))
+                a62 += move_62();
+            break;
         }
+
         if((i+1)%10000==0)
-            fprintf(stderr,"  %d: tets=%d 23=%d 32=%d\n",i+1,n_tets_alive,a23,a32);
+            fprintf(stderr,"  %d: tets=%d 23=%d 32=%d 26=%d 62=%d\n",
+                    i+1,n_tets_alive,a23,a32,a26,a62);
     }
-    fprintf(stderr,"After Pachner: tets=%d, 23=%d, 32=%d\n",n_tets_alive,a23,a32);
+    fprintf(stderr,"After: tets=%d, 23=%d 32=%d 26=%d 62=%d\n",
+            n_tets_alive,a23,a32,a26,a62);
 
     fprintf(stderr,"Random walk (%d)...\n",nw);
     measure_dspec(nw,smax);
