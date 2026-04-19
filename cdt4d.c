@@ -7,7 +7,7 @@
  * Spectral dimension: random walk on dual graph (4-simplex -> 4-simplex)
  *
  * This is a SIMPLIFIED CDT: no Pachner moves (initial config only + spatial flips).
- * The spectral dimension of the REGULAR lattice should give d_IR ≈ 4.
+ * The spectral dimension of the REGULAR lattice should give d_IR   4.
  * With spatial randomization, we test if d_UV < 4 appears.
  *
  * Compile: cl /O2 /std:c11 /Fe:cdt4d.exe cdt4d.c
@@ -281,117 +281,49 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Pachner moves (%d, k0=%.1f, k4=%.1f)...\n",
                 n_pachner, k0_val, k4_val);
         int acc24=0, acc42=0, acc33=0;
+        int dbg33_edge=0, dbg33_tri=0, dbg33_nd=0;
         int target = n_4sim;
 
         for(int iter=0; iter<n_pachner; iter++) {
-            int move_type = rand()%3; /* 0=(4,2), 1=(2,4), 2=(3,3) */
+            int move_type = rand()%3; /* FORCE (3,3) for debug */
 
             if(move_type == 2) {
                 /* ============ (3,3) move ============ */
-                /* Pick edge shared by exactly 3 simplices.
-                   Replace 3 simplices around edge with 3 around dual face. */
-                int si0 = rand() % n_4sim;
-                if(sim5[si0][0]<0) continue;
-                int edges[10][2]={{0,1},{0,2},{0,3},{0,4},{1,2},{1,3},{1,4},{2,3},{2,4},{3,4}};
-                int ei = rand() % 10;
-                int e1 = sim5[si0][edges[ei][0]], e2 = sim5[si0][edges[ei][1]];
+                /* (3,3) block entered */
+                /* (3,3): triangle shared by exactly 3 simplices  
+                   swap to dual configuration.
+                   Strategy: pick simplex, pick edge, find all sims sharing edge.
+                   Then pick 3rd vertex to form triangle shared by exactly 3. */
 
-                /* Find all simplices sharing edge (e1,e2) */
-                int ring[10]; int nr=0;
-                for(int s=0; s<n_4sim && nr<10; s++){
+                int si1;
+                {int att2=0; do{si1=rand()%n_4sim;att2++;}while(sim5[si1][0]<0 && att2<50);}
+                if(sim5[si1][0]<0) continue;
+                /* Pick edge from si1 */
+                int edge_pairs[10][2]={{0,1},{0,2},{0,3},{0,4},{1,2},{1,3},{1,4},{2,3},{2,4},{3,4}};
+                int epi = rand()%10;
+                int ev1=sim5[si1][edge_pairs[epi][0]], ev2=sim5[si1][edge_pairs[epi][1]];
+
+                /* Find all sims containing this edge */
+                int edge_sims[20]; int nes=0;
+                for(int s=0;s<n_4sim && nes<20;s++){
                     if(sim5[s][0]<0) continue;
                     int h1=0,h2=0;
-                    for(int k=0;k<5;k++){
-                        if(sim5[s][k]==e1) h1=1;
-                        if(sim5[s][k]==e2) h2=1;
-                    }
-                    if(h1&&h2) ring[nr++]=s;
+                    for(int k=0;k<5;k++){if(sim5[s][k]==ev1)h1=1;if(sim5[s][k]==ev2)h2=1;}
+                    if(h1&&h2) edge_sims[nes++]=s;
                 }
-                if(nr != 3) continue;
+                if(dbg33_edge < 3) fprintf(stderr, "  33dbg: nes=%d ev1=%d ev2=%d\n", nes, ev1, ev2);
+                dbg33_edge++;
+                if(nes<3) continue;
 
-                /* Collect other 3 vertices */
-                int abc[3]; int na=0;
-                for(int i=0;i<3;i++)
-                    for(int k=0;k<5;k++){
-                        int v=sim5[ring[i]][k];
-                        if(v==e1||v==e2) continue;
-                        int dup=0;
-                        for(int j=0;j<na;j++) if(abc[j]==v){dup=1;break;}
-                        if(!dup && na<3) abc[na++]=v;
-                    }
-                if(na!=3) continue;
-                int a=abc[0],b=abc[1],c=abc[2];
-
-                /* Check: new edge config (face a,b,c shared by 2) must not already exist
-                   i.e., no simplex contains all of a,b,c */
-                int face_exists=0;
-                for(int s=0; s<n_4sim && !face_exists; s++){
-                    if(sim5[s][0]<0) continue;
-                    int ha=0,hb=0,hc=0;
-                    for(int k=0;k<5;k++){
-                        if(sim5[s][k]==a)ha=1;if(sim5[s][k]==b)hb=1;if(sim5[s][k]==c)hc=1;
-                    }
-                    if(ha&&hb&&hc) face_exists=1;
+                /* Pick a 3rd vertex from si1 (not ev1,ev2) to form triangle */
+                int other_v[3]; int nov=0;
+                for(int k=0;k<5;k++){
+                    int v=sim5[si1][k];
+                    if(v!=ev1 && v!=ev2 && nov<3) other_v[nov++]=v;
                 }
-                /* Actually face (a,b,c) is INSIDE the ring, so it exists in the ring tets.
-                   We need face (a,b,c) to not exist OUTSIDE the ring. */
-                /* Skip this check for now — the move is volume-preserving and safe topologically
-                   as long as the ring configuration is correct. */
-
-                /* Identify ring simplices:
-                   The 3 simplices share edge(e1,e2) and each has 3 of {a,b,c}.
-                   Each simplex has {e1,e2} + 3 others, where 2 are from {a,b,c}.
-                   Wait: 5 vertices = e1,e2 + 3 others. The 3 others include 2 from {a,b,c}.
-                   No: total other vertices = 3 (a,b,c). Each simplex has 3 other vertices.
-                   So each simplex has ALL of a,b,c? No, 5 = 2(e1,e2) + 3 others.
-                   If na=3 distinct others, and each simplex has exactly 3 others,
-                   then each simplex contains all of a,b,c.
-                   But that means all 3 simplices are identical! Can't be right. */
-
-                /* Actually: nr=3 simplices around edge (e1,e2), each has 5 vertices
-                   including e1,e2. So each has 3 OTHER vertices. Total distinct others=3.
-                   This means all 3 simplices have the SAME 5 vertices {e1,e2,a,b,c}.
-                   That's impossible (they'd be identical). So nr=3 can't have na=3.
-                   Unless some simplices share 2 of {a,b,c} and differ in the 3rd.
-                   But 5 = 2 + 3 means each simplex has e1,e2 and 3 others.
-                   With 3 simplices * 3 others = 9 slots, 3 distinct values → each appears 3 times.
-                   So each of a,b,c appears in all 3 simplices. All simplices = {e1,e2,a,b,c}. Contradiction. */
-
-                /* The (3,3) move works differently in 4D. Let me reconsider.
-                   Actually in 4D, an edge can be shared by MORE than 4 simplices.
-                   The (3,3) move acts on a TRIANGLE (2-simplex), not an edge:
-                   - 3 four-simplices share a triangle (a,b,c)
-                   - Each has (a,b,c) + 2 other vertices from {d,e,f}
-                   - Replace with 3 new simplices sharing edge (d,e,f)... no, edge is 1D.
-
-                   Actually the (3,3) move in 4D is:
-                   3 four-simplices sharing a 2-face (triangle abc), with opposite vertices {d,e,f}
-                   → 3 new four-simplices sharing the dual 2-face (triangle def) with opposite vertices {a,b,c}
-
-                   Input:  (a,b,c,d,e), (a,b,c,d,f), (a,b,c,e,f)
-                   Output: (a,d,e,f,?), ... wait, need to be more careful.
-
-                   (3,3) in 4D: the triangle (a,b,c) is shared by 3 simplices:
-                   T1=(a,b,c,d,e), T2=(a,b,c,d,f), T3=(a,b,c,e,f)
-                   Note: each pair shares a tetrahedron: T1∩T2=(a,b,c,d), T1∩T3=(a,b,c,e), T2∩T3=(a,b,c,f)
-
-                   Output: 3 new simplices sharing triangle (d,e,f):
-                   T1'=(a,b,d,e,f), T2'=(a,c,d,e,f), T3'=(b,c,d,e,f)
-                */
-
-                /* (3,3): triangle (a,b,c) shared by 3 simplices →
-                   triangle (d,e,f) shared by 3 new simplices.
-                   Input:  (a,b,c,d,e), (a,b,c,d,f), (a,b,c,e,f)
-                   Output: (a,b,d,e,f), (a,c,d,e,f), (b,c,d,e,f) */
-
-                /* Find 3 simplices sharing a random triangle */
-                int si1 = rand() % n_4sim;
-                if(sim5[si1][0]<0) continue;
-                /* Pick 3 vertices of si1 as candidate triangle */
-                int tri_idx[3] = {rand()%5, 0, 0};
-                do{tri_idx[1]=rand()%5;}while(tri_idx[1]==tri_idx[0]);
-                do{tri_idx[2]=rand()%5;}while(tri_idx[2]==tri_idx[0]||tri_idx[2]==tri_idx[1]);
-                int ta=sim5[si1][tri_idx[0]], tb=sim5[si1][tri_idx[1]], tc=sim5[si1][tri_idx[2]];
+                if(nov<1) continue;
+                int tv3 = other_v[rand()%nov];
+                int ta=ev1, tb=ev2, tc=tv3;  /* triangle (ta,tb,tc) */
 
                 /* Find other 2 simplices sharing triangle (ta,tb,tc) */
                 int shared_sims[3]; int ns2=0;
@@ -404,6 +336,7 @@ int main(int argc, char **argv) {
                     if(ha&&hb&&hc) shared_sims[ns2++]=s;
                 }
                 if(ns2!=3) continue;
+                dbg33_tri++;
 
                 /* Get opposite vertices d,e,f (one per simplex, not in triangle) */
                 int def[3]; int nd=0;
@@ -419,10 +352,11 @@ int main(int argc, char **argv) {
                     }
                 }
                 if(nd!=3) continue;
+                dbg33_nd++;
                 int dd=def[0], ee=def[1], ff=def[2];
 
                 /* Verify: the 3 input simplices are:
-                   (ta,tb,tc,X,Y) where {X,Y} ⊂ {dd,ee,ff}
+                   (ta,tb,tc,X,Y) where {X,Y}   {dd,ee,ff}
                    Should be: {dd,ee}, {dd,ff}, {ee,ff} */
                 int ok=1;
                 for(int i=0;i<3;i++){
@@ -441,14 +375,14 @@ int main(int argc, char **argv) {
                 /* Input sim i: 2 external faces are those NOT containing the triangle vertices
                    that are shared with other input sims. Actually:
                    For input (ta,tb,tc,X,Y), faces containing all of ta,tb,tc:
-                     (ta,tb,tc,X) and (ta,tb,tc,Y) — these are shared with the other input sims.
-                   Face NOT containing X: (ta,tb,tc,Y,...) — wait, face = 4 vertices of 5.
+                     (ta,tb,tc,X) and (ta,tb,tc,Y)   these are shared with the other input sims.
+                   Face NOT containing X: (ta,tb,tc,Y,...)   wait, face = 4 vertices of 5.
                    5 faces of (ta,tb,tc,X,Y):
                      opp ta: (tb,tc,X,Y)
                      opp tb: (ta,tc,X,Y)
                      opp tc: (ta,tb,X,Y)
-                     opp X:  (ta,tb,tc,Y)  ← shared
-                     opp Y:  (ta,tb,tc,X)  ← shared
+                     opp X:  (ta,tb,tc,Y)    shared
+                     opp Y:  (ta,tb,tc,X)    shared
                    So 3 external faces (opp ta, opp tb, opp tc). */
 
                 /* For each external face of each input sim, save its neighbor */
@@ -475,7 +409,7 @@ int main(int argc, char **argv) {
                 if(si_de<0||si_df<0||si_ef<0) continue;
 
                 /* Create 3 new simplices:
-                   T1'=(ta,tb,dd,ee,ff) — replaces the triangle vertex tc
+                   T1'=(ta,tb,dd,ee,ff)   replaces the triangle vertex tc
                    Wait, output should be: (a,b,d,e,f), (a,c,d,e,f), (b,c,d,e,f)
                    where a=ta, b=tb, c=tc, d=dd, e=ee, f=ff */
                 int nv1[5]={ta,tb,dd,ee,ff}; sort5(nv1);
@@ -489,18 +423,18 @@ int main(int argc, char **argv) {
                 memcpy(sim5[ni3],nv3,5*sizeof(int));
 
                 /* Internal connections (3 pairs, via face containing dd,ee,ff + 1 of ta,tb,tc):
-                   T1'↔T2' via (ta,dd,ee,ff): T1' opp tb, T2' opp tc
-                   T1'↔T3' via (tb,dd,ee,ff): T1' opp ta, T3' opp tc
-                   T2'↔T3' via (tc,dd,ee,ff): T2' opp ta, T3' opp tb */
+                   T1' T2' via (ta,dd,ee,ff): T1' opp tb, T2' opp tc
+                   T1' T3' via (tb,dd,ee,ff): T1' opp ta, T3' opp tc
+                   T2' T3' via (tc,dd,ee,ff): T2' opp ta, T3' opp tb */
                 set_nb5(ni1,tb,ni2); set_nb5(ni2,tc,ni1);
                 set_nb5(ni1,ta,ni3); set_nb5(ni3,tc,ni1);
                 set_nb5(ni2,ta,ni3); set_nb5(ni3,tb,ni2);
 
                 /* External connections:
                    T1'=(ta,tb,dd,ee,ff) external faces:
-                     opp dd=(ta,tb,ee,ff): was in input (ta,tb,tc,ee,ff)=si_ef, face opp tc → ext_nb[si_ef][2]
-                     opp ee=(ta,tb,dd,ff): was in si_df, face opp tc → ext_nb[si_df][2]
-                     opp ff=(ta,tb,dd,ee): was in si_de, face opp tc → ext_nb[si_de][2]
+                     opp dd=(ta,tb,ee,ff): was in input (ta,tb,tc,ee,ff)=si_ef, face opp tc   ext_nb[si_ef][2]
+                     opp ee=(ta,tb,dd,ff): was in si_df, face opp tc   ext_nb[si_df][2]
+                     opp ff=(ta,tb,dd,ee): was in si_de, face opp tc   ext_nb[si_de][2]
                    Wait, this isn't right. Let me think again.
 
                    Input si_de = (ta,tb,tc,dd,ee). Its external face opp tc = (ta,tb,dd,ee).
@@ -508,10 +442,10 @@ int main(int argc, char **argv) {
                    So: set_nb5(ni1, ff, ext_nb[si_de][2]) and redirect old neighbor.
 
                    Input si_df = (ta,tb,tc,dd,ff). External face opp tc = (ta,tb,dd,ff).
-                   → T1' face opp ee = (ta,tb,dd,ff). set_nb5(ni1, ee, ext_nb[si_df][2]).
+                     T1' face opp ee = (ta,tb,dd,ff). set_nb5(ni1, ee, ext_nb[si_df][2]).
 
                    Input si_ef = (ta,tb,tc,ee,ff). External face opp tc = (ta,tb,ee,ff).
-                   → T1' face opp dd = (ta,tb,ee,ff). set_nb5(ni1, dd, ext_nb[si_ef][2]). */
+                     T1' face opp dd = (ta,tb,ee,ff). set_nb5(ni1, dd, ext_nb[si_ef][2]). */
 
                 /* T1' external faces (opp dd, ee, ff): */
                 set_nb5(ni1,dd,ext_nb[si_ef][2]);
@@ -538,6 +472,7 @@ int main(int argc, char **argv) {
                 if(ext_nb[si_de][0]>=0){for(int j=0;j<5;j++)if(sim5_nb[ext_nb[si_de][0]][j]==shared_sims[si_de]){sim5_nb[ext_nb[si_de][0]][j]=ni3;break;}}
 
                 acc33++;
+                if(acc33<=3) fprintf(stderr,"  (3,3) success! edge+=%d tri+=%d\n",dbg33_edge,dbg33_tri);
                 continue;
             }
 
@@ -624,33 +559,33 @@ int main(int argc, char **argv) {
                 for(int k=0;k<5;k++){sim5_nb[t3][k]=-1;sim5_nb[t4][k]=-1;}
                 /* Note: n_4sim doesn't decrease (dead slots remain) */
 
-                /* Internal: S1 ↔ S2 via shared face (a,b,c,d) */
+                /* Internal: S1   S2 via shared face (a,b,c,d) */
                 set_nb5(t1,e1,t2); set_nb5(t2,e2,t1);
 
                 /* External */
-                /* S1 opp d = (a,b,c,e1) ← nb_abce1 */
+                /* S1 opp d = (a,b,c,e1)   nb_abce1 */
                 set_nb5(t1,d,nb_abce1);
                 if(nb_abce1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abce1][j]==t1||sim5_nb[nb_abce1][j]==t2||sim5_nb[nb_abce1][j]==t3||sim5_nb[nb_abce1][j]==t4){sim5_nb[nb_abce1][j]=t1;break;}}
-                /* S1 opp c = (a,b,d,e1) ← nb_abde1 */
+                /* S1 opp c = (a,b,d,e1)   nb_abde1 */
                 set_nb5(t1,c,nb_abde1);
                 if(nb_abde1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abde1][j]==t1||sim5_nb[nb_abde1][j]==t2||sim5_nb[nb_abde1][j]==t3||sim5_nb[nb_abde1][j]==t4){sim5_nb[nb_abde1][j]=t1;break;}}
-                /* S1 opp b = (a,c,d,e1) ← nb_acde1 */
+                /* S1 opp b = (a,c,d,e1)   nb_acde1 */
                 set_nb5(t1,b,nb_acde1);
                 if(nb_acde1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_acde1][j]==t1||sim5_nb[nb_acde1][j]==t2||sim5_nb[nb_acde1][j]==t3||sim5_nb[nb_acde1][j]==t4){sim5_nb[nb_acde1][j]=t1;break;}}
-                /* S1 opp a = (b,c,d,e1) ← nb_bcde1 */
+                /* S1 opp a = (b,c,d,e1)   nb_bcde1 */
                 set_nb5(t1,a,nb_bcde1);
                 if(nb_bcde1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_bcde1][j]==t1||sim5_nb[nb_bcde1][j]==t2||sim5_nb[nb_bcde1][j]==t3||sim5_nb[nb_bcde1][j]==t4){sim5_nb[nb_bcde1][j]=t1;break;}}
 
-                /* S2 opp d = (a,b,c,e2) ← nb_abce2 */
+                /* S2 opp d = (a,b,c,e2)   nb_abce2 */
                 set_nb5(t2,d,nb_abce2);
                 if(nb_abce2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abce2][j]==t1||sim5_nb[nb_abce2][j]==t2||sim5_nb[nb_abce2][j]==t3||sim5_nb[nb_abce2][j]==t4){sim5_nb[nb_abce2][j]=t2;break;}}
-                /* S2 opp c = (a,b,d,e2) ← nb_abde2 */
+                /* S2 opp c = (a,b,d,e2)   nb_abde2 */
                 set_nb5(t2,c,nb_abde2);
                 if(nb_abde2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abde2][j]==t1||sim5_nb[nb_abde2][j]==t2||sim5_nb[nb_abde2][j]==t3||sim5_nb[nb_abde2][j]==t4){sim5_nb[nb_abde2][j]=t2;break;}}
-                /* S2 opp b = (a,c,d,e2) ← nb_acde2 */
+                /* S2 opp b = (a,c,d,e2)   nb_acde2 */
                 set_nb5(t2,b,nb_acde2);
                 if(nb_acde2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_acde2][j]==t1||sim5_nb[nb_acde2][j]==t2||sim5_nb[nb_acde2][j]==t3||sim5_nb[nb_acde2][j]==t4){sim5_nb[nb_acde2][j]=t2;break;}}
-                /* S2 opp a = (b,c,d,e2) ← nb_bcde2 */
+                /* S2 opp a = (b,c,d,e2)   nb_bcde2 */
                 set_nb5(t2,a,nb_bcde2);
                 if(nb_bcde2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_bcde2][j]==t1||sim5_nb[nb_bcde2][j]==t2||sim5_nb[nb_bcde2][j]==t3||sim5_nb[nb_bcde2][j]==t4){sim5_nb[nb_bcde2][j]=t2;break;}}
 
@@ -759,45 +694,45 @@ int main(int argc, char **argv) {
 
             /* Internal connections (6 pairs) */
             #define set_nb5(si,v_opp,nb) {int _fi=fidx(si,v_opp);if(_fi>=0)sim5_nb[si][_fi]=(nb);}
-            /* T1↔T2 via (a,b,e1,e2): T1 opp c, T2 opp d */
+            /* T1 T2 via (a,b,e1,e2): T1 opp c, T2 opp d */
             set_nb5(ti1,c,ti2); set_nb5(ti2,d,ti1);
-            /* T1↔T3 via (a,c,e1,e2): T1 opp b, T3 opp d */
+            /* T1 T3 via (a,c,e1,e2): T1 opp b, T3 opp d */
             set_nb5(ti1,b,ti3); set_nb5(ti3,d,ti1);
-            /* T1↔T4 via (b,c,e1,e2): T1 opp a, T4 opp d */
+            /* T1 T4 via (b,c,e1,e2): T1 opp a, T4 opp d */
             set_nb5(ti1,a,ti4); set_nb5(ti4,d,ti1);
-            /* T2↔T3 via (a,d,e1,e2): T2 opp b, T3 opp c */
+            /* T2 T3 via (a,d,e1,e2): T2 opp b, T3 opp c */
             set_nb5(ti2,b,ti3); set_nb5(ti3,c,ti2);
-            /* T2↔T4 via (b,d,e1,e2): T2 opp a, T4 opp c */
+            /* T2 T4 via (b,d,e1,e2): T2 opp a, T4 opp c */
             set_nb5(ti2,a,ti4); set_nb5(ti4,c,ti2);
-            /* T3↔T4 via (c,d,e1,e2): T3 opp a, T4 opp b */
+            /* T3 T4 via (c,d,e1,e2): T3 opp a, T4 opp b */
             set_nb5(ti3,a,ti4); set_nb5(ti4,b,ti3);
 
             /* External connections */
-            /* T1 opp e2 = (a,b,c,e1) ← S1's old nb at face opp d */
+            /* T1 opp e2 = (a,b,c,e1)   S1's old nb at face opp d */
             set_nb5(ti1,e2,nb_abc_e1);
             if(nb_abc_e1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abc_e1][j]==si1){sim5_nb[nb_abc_e1][j]=ti1;break;}}
-            /* T1 opp e1 = (a,b,c,e2) ← S2's old nb at face opp d */
+            /* T1 opp e1 = (a,b,c,e2)   S2's old nb at face opp d */
             set_nb5(ti1,e1,nb_abc_e2);
             if(nb_abc_e2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abc_e2][j]==si2){sim5_nb[nb_abc_e2][j]=ti1;break;}}
 
-            /* T2 opp e2 = (a,b,d,e1) ← S1 opp c */
+            /* T2 opp e2 = (a,b,d,e1)   S1 opp c */
             set_nb5(ti2,e2,nb_abd_e1);
             if(nb_abd_e1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abd_e1][j]==si1){sim5_nb[nb_abd_e1][j]=ti2;break;}}
-            /* T2 opp e1 = (a,b,d,e2) ← S2 opp c */
+            /* T2 opp e1 = (a,b,d,e2)   S2 opp c */
             set_nb5(ti2,e1,nb_abd_e2);
             if(nb_abd_e2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_abd_e2][j]==si2){sim5_nb[nb_abd_e2][j]=ti2;break;}}
 
-            /* T3 opp e2 = (a,c,d,e1) ← S1 opp b */
+            /* T3 opp e2 = (a,c,d,e1)   S1 opp b */
             set_nb5(ti3,e2,nb_acd_e1);
             if(nb_acd_e1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_acd_e1][j]==si1){sim5_nb[nb_acd_e1][j]=ti3;break;}}
-            /* T3 opp e1 = (a,c,d,e2) ← S2 opp b */
+            /* T3 opp e1 = (a,c,d,e2)   S2 opp b */
             set_nb5(ti3,e1,nb_acd_e2);
             if(nb_acd_e2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_acd_e2][j]==si2){sim5_nb[nb_acd_e2][j]=ti3;break;}}
 
-            /* T4 opp e2 = (b,c,d,e1) ← S1 opp a */
+            /* T4 opp e2 = (b,c,d,e1)   S1 opp a */
             set_nb5(ti4,e2,nb_bcd_e1);
             if(nb_bcd_e1>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_bcd_e1][j]==si1){sim5_nb[nb_bcd_e1][j]=ti4;break;}}
-            /* T4 opp e1 = (b,c,d,e2) ← S2 opp a */
+            /* T4 opp e1 = (b,c,d,e2)   S2 opp a */
             set_nb5(ti4,e1,nb_bcd_e2);
             if(nb_bcd_e2>=0){for(int j=0;j<5;j++)if(sim5_nb[nb_bcd_e2][j]==si2){sim5_nb[nb_bcd_e2][j]=ti4;break;}}
 
@@ -807,7 +742,8 @@ int main(int argc, char **argv) {
                 fprintf(stderr, "  %d: 24=%d 42=%d 33=%d n4=%d\n",
                         iter+1, acc24, acc42, acc33, n_4sim);
         }
-        fprintf(stderr, "After: 24=%d 42=%d 33=%d\n", acc24, acc42, acc33);
+        fprintf(stderr, "After: 24=%d 42=%d 33=%d (dbg: edge=%d tri=%d nd=%d)\n",
+                acc24, acc42, acc33, dbg33_edge, dbg33_tri, dbg33_nd, dbg33_nd);
     }
 
     fprintf(stderr, "Random walk (%d walks, sigma_max=%d)...\n", n_walks, sigma_max);
