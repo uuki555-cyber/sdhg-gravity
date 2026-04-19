@@ -149,6 +149,6 @@ All quantitative claims in this repository are reproducible from the included sc
 | CDT gamma (2+1D, 5-seed) | 0.87 ± 0.1 ≈ 1 | `cdt_main.c` |
 | CDT d_UV / d_IR (2+1D) | 2.2 / 3.9 | `cdt_main.c` |
 | CDT d_UV / d_IR (4D) | 3.7 / 4.3 | `cdt4d.c` |
-| 4D CDT (2,4)+(4,2) | implemented | `cdt4d.c` |
+| 4D CDT (2,4)+(4,2)+(3,3) | d_UV=3.5-3.7, d_IR=4+ | `cdt4d.c` |
 | p_flat = (d-2)/(d-1) | 0.5 for d=3 = McGaugh | derived |
 | p_max = (d-1)/d | 2/3 for d=3 | data-exact |
