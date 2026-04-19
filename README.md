@@ -110,3 +110,22 @@ This is an independent, exploratory research project by a non-academic individua
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Complete Analysis Summary
+
+All quantitative claims in this repository are reproducible from the included scripts. Key results:
+
+| Finding | Value | Precision | Script |
+|---------|-------|-----------|--------|
+| Global fit improvement | +15.5% | ±0.1% | `run_global_fit.py` |
+| Alpha (free) | 0.312 | | `run_global_fit.py` |
+| Alpha = 1/3 cost | +0.02% RMS | | `run_global_fit.py` |
+| p_max = 2/3 cost | +0.00% RMS | | verified in analysis |
+| Coefficients A=2, B=3 | 0.5% precision | | verified in analysis |
+| Li+ gap (p(M) vs G(M)) | 11% | | `run_global_fit.py` |
+| MOND bias-mass r | +0.47 | | `run_bias_analysis.py` |
+| LOO cross-validation | +5.4% | | `run_loo_cv.py` |
+| Gas-dominated alpha | 0.184 | +6.8% vs McGaugh | analysis |
+| Disk galaxy alpha | 0.341 ≈ 1/3 | +7.3% vs McGaugh | analysis |
+| CDT gamma (2+1D) | 0.87 ± 0.1 | | `cdt_main.c` |
+| CDT d_UV | 2.1-2.2 | | `cdt_main.c` |
