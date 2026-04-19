@@ -8,3 +8,4 @@ tmp*.txt
 cdt_*stderr.txt
 cdt_*err.txt
 cdt_out.txt
+trigger
