@@ -10,7 +10,7 @@ mu(x, M) = 1 - exp(-x^p(M))
 p(M) = 2u / (1 + 3u),   u = (M / M0)^(1/3)
 ```
 
-where `x = g_bar / a0`, `M` is the system mass (see [mass definition note](#limitations)), and `M0 ~ 10^10.2 solar masses`.
+where `x = g_bar / a0`, `M` is the system mass (see [mass definition note](#limitations)), and `M0 ~ 10^10.2 solar masses`. The exponent 1/3 is empirically verified: fixing alpha = 1/3 degrades the global fit by only 0.02% compared to the free fit (alpha = 0.312), while alpha = 1/4 degrades by 0.26%.
 
 For the standard McGaugh formula, `p = 0.5` for all systems. We find that `p` increases from ~0.2 for dwarf galaxies to ~0.66 for galaxy clusters, and a single formula describes both galaxy rotation curves and cluster mass discrepancies.
 
