@@ -1,7 +1,0 @@
-CDT: L=10 T=15 therm=20000 walks=200000 seed=42
-Initial: 200 tri/slice, 100 vert/slice
-Thermalizing (20000 flips/slice)... done. Accepted: 25871/300000 (9%)
-Building tetrahedra... 12008 tets
-Building dual graph... avg_nb=1.99
-Random walk...
-Done.

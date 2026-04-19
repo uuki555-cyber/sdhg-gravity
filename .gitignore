@@ -1,3 +1,10 @@
 __pycache__/
 *.pyc
 .DS_Store
+*.exe
+*.obj
+*.bat
+tmp*.txt
+cdt_*stderr.txt
+cdt_*err.txt
+cdt_out.txt
