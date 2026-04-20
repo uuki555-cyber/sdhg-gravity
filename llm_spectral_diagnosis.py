@@ -197,3 +197,4 @@ if __name__ == "__main__":
     t0 = time.time()
     analyze_model(model_name)
     print(f"\nTotal time: {time.time()-t0:.0f}s")
+# verified
