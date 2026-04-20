@@ -820,9 +820,79 @@ int main(int argc,char**argv){
         }
     }
 
+
+    /* === Hausdorff dimension === */
+    {
+        int n_samples = 200;
+        int r_max = 60;
+        double *vol = (double*)calloc(r_max, sizeof(double));
+        
+        for(int s=0; s<n_samples; s++){
+            int start;
+            do{start=rand()%n_tets_total;}while(!ta[start]);
+            
+            /* BFS to count tets at each geodesic distance */
+            int *dist = (int*)calloc(n_tets_total, sizeof(int));
+            for(int i=0;i<n_tets_total;i++) dist[i]=-1;
+            dist[start]=0;
+            
+            int *queue = (int*)malloc(n_tets_total*sizeof(int));
+            int qh=0, qt=0;
+            queue[qt++]=start;
+            
+            while(qh<qt){
+                int cur=queue[qh++];
+                int d=dist[cur];
+                if(d>=r_max-1) continue;
+                for(int k=0;k<4;k++){
+                    int nb=tn[cur][k];
+                    if(nb>=0 && ta[nb] && dist[nb]<0){
+                        dist[nb]=d+1;
+                        queue[qt++]=nb;
+                    }
+                }
+            }
+            
+            /* Count V(R) = tets within distance R */
+            for(int i=0;i<n_tets_total;i++){
+                if(dist[i]>=0 && dist[i]<r_max)
+                    vol[dist[i]] += 1.0;
+            }
+            
+            free(dist); free(queue);
+        }
+        
+        for(int r=0;r<r_max;r++) vol[r] /= n_samples;
+        
+        /* Cumulative V(R) */
+        double *cumV = (double*)calloc(r_max, sizeof(double));
+        cumV[0]=vol[0];
+        for(int r=1;r<r_max;r++) cumV[r]=cumV[r-1]+vol[r];
+        
+        /* Fit: log V(R) = dH * log(R) + const */
+        /* Use R=5..30 range */
+        double sx=0,sy=0,sxx=0,sxy=0; int n=0;
+        for(int r=5;r<=30;r++){
+            if(cumV[r]>1){
+                double lx=log((double)r), ly=log(cumV[r]);
+                sx+=lx; sy+=ly; sxx+=lx*lx; sxy+=lx*ly; n++;
+            }
+        }
+        if(n>2){
+            double dH = (n*sxy - sx*sy)/(n*sxx - sx*sx);
+            fprintf(stderr, "Hausdorff dimension: dH = %.2f\n", dH);
+        }
+        
+        free(vol); free(cumV);
+    }
+
     fprintf(stderr,"Random walk (%d)...\n",nw);
     measure_dspec(nw,smax);
 
     fprintf(stderr,"Done.\n");
     return 0;
 }
+
+/* Hausdorff dimension: V(R) ~ R^dH
+   Count simplices within geodesic distance R from random starting points */
+/* (appended to end of file, called before random walk) */
