@@ -114,7 +114,16 @@ For DF-2:
 **Response (literature search complete)**:
 
 **Closest prior work (must cite)**:
-1. **Hofstetter & Kroupa 2025** (arXiv:2504.17002): p-Laplacian framework with **density-dependent exponent**. They state "p increases with decreasing density." **Critical differences**: they use volume density ρ (not Σ); they modify the kinetic operator (not the RAR exponent locally); they don't use a sigmoid 2u/(1+3u) form; they don't anchor to Σ_0 = a_0/(4π²G). Conceptually adjacent but distinct.
+1. **Scherer, Pflamm-Altenburg, Kroupa & Gjergo 2025** (A&A 698, A167; arXiv:2504.17002): p-Laplacian framework `∇·(|∇Φ|/a_0)^(p-2)∇Φ = 4πGρ` with **density-dependent exponent**. **Critical differences from this work**:
+   - They use volume density ρ (M☉/Mpc³); we use surface density Σ (M☉/pc²)
+   - Their p-range 2-12+ (unbounded, from Newtonian to cosmological); ours [0, 2/3] (bounded)
+   - Their functional form: exponential ρ(p) = 54·exp(-1.614p) M☉/Mpc³; ours: sigmoid 2u/(1+3u)
+   - Their characteristic scale: cosmological ρ_crit ≈ 1.4×10⁻⁷ M☉/Mpc³; ours: Σ_0 = a_0/(4π²G)
+   - Their data: dSphs (Lelli+17) + HIFLUGS clusters (Li+23); ours: SPARC + clusters
+   - They modify the gravitational operator; we modify the local RAR exponent of μ(x)
+   - They explicitly state "the physical meaning of p is to be explored"; we connect p to surface density and CDT spectral dimension flow
+   
+   **Risk of priority/novelty conflict**: very low. Different variables, different scales, different functional forms.
 
 2. **Milgrom 2016 CSDR** (arXiv:1607.05103): Central Surface Density Relation Σ_D⁰ = Σ_M · S(Σ_B⁰/Σ_M), where Σ_M = a_0/(2πG) ≈ 137 M_sun/pc². **Critical difference**: Σ enters as the *argument* of a fixed ν-function; the *shape* is universal. We modify the function shape itself.
 
