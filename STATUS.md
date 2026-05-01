@@ -72,19 +72,30 @@ data (observed ~0.66, **1% agreement**).
    identification, not derivation.
 
 ### Physical scope
-4. **External Field Effect (EFE) regime is degenerate**: For satellites and
-   group/cluster members in deep MOND with EFE suppression, both p=0.5
-   (McGaugh) and p(Σ) predictions are dominated by μ → 0 behavior; the
-   exponent matters less. We tested 7 UDG/satellite systems with naive
-   EFE corrections (`run_efe_predictions.py`):
-   - p(Σ) does not clearly outperform McGaugh+EFE
-   - For Crater II, Antlia II, Sculptor, Fornax, DF-44, Leo P: McGaugh+EFE
-     is at least as good as p(Σ)+EFE
-   - Our naive EFE implementation (factor √(g_in/(g_in+g_ex))) is cruder
-     than McGaugh's published formulation
-   - **Conclusion**: p(Σ) is **not** a distinguishing prediction in
-     EFE-dominated regime. Earlier "p(Σ) explains Crater II" claim was
-     overstated. Retracted.
+4. **External Field Effect (EFE) regime: p(Σ) under-predicts** (`efe_mond.py`):
+   We implemented McGaugh 2016's exact EFE formalism (Eqs. 1-5; ν=1/y in
+   deep MOND, σ_iso⁴ = (4/81) GMa_0, σ_efe² = a_0GM/(3 g_ex r_{1/2})).
+   This **reproduces McGaugh's Crater II prediction σ = 2.1 km/s exactly**.
+
+   For p(Σ)+EFE, the prediction is much lower:
+   | Galaxy | σ_obs | σ_McG_EFE | σ_pΣ_EFE |
+   |--------|:-----:|:---------:|:--------:|
+   | Crater II | 2.7 | **2.06** ✓ | 0.58 |
+   | Sculptor | 9.2 | 8.70 | 4.34 |
+   | Antlia II | 5.7 | 1.82 | 0.58 |
+   | Draco | 9.1 | 3.92 | 1.74 |
+
+   **Physical interpretation**: In McGaugh's exponential μ(x) = 1 - exp(-x^p),
+   the deep-MOND limit is g = g_bar^(1-p) × g_†^p. For p=0.5 this is
+   √(g_bar a_0) (standard MOND). For p(Σ)→0 at very low Σ, it becomes
+   g ≈ g_bar (Newtonian, no MOND boost). p(Σ) destroys the deep-MOND
+   scaling necessary for low-Σ satellites.
+
+   **Conclusion**: p(Σ) is a phenomenological RAR description tuned to
+   the transition regime (x ~ 1) where SPARC disk galaxies sit. It does
+   **not** extrapolate to the deep-MOND regime where standard MOND
+   (p = 0.5) is required. Earlier "p(Σ) explains Crater II" claim was
+   overstated. **Retracted.**
 
 5. **The distinguishing prediction is in the TRANSITION regime**: At
    x = g_bar/a_0 ~ 1, μ(x) shape differences matter most. This is exactly
@@ -132,15 +143,24 @@ data (observed ~0.66, **1% agreement**).
 2. **Physical mechanism for p(Σ)?** We have only structural connection to CDT.
    No microscopic derivation.
 
-3. **Does p(Σ) work in BIG-SPARC?** Not tested yet; would be a powerful
-   independent test.
+3. **Does p(Σ) work in BIG-SPARC?** Not tested yet (BIG-SPARC unreleased);
+   would be a powerful independent test. Unified corpus (438 galaxies)
+   confirms β ≈ 0.4 holds across SPARC-style samples.
 
-4. **EFE-corrected p(Σ) predictions for UDGs?** Not yet implemented; would
-   distinguish p(Σ) from McGaugh + EFE.
+4. **Why does p(Σ) fail at deep MOND?** Because p(Σ)→0 at very low Σ
+   destroys the deep-MOND boost. The improvement on SPARC is in the
+   transition regime where this issue doesn't apply. Whether p(Σ) can be
+   modified to preserve deep MOND (e.g., p(Σ) = max(0.5, 2u/(1+3u)))
+   while maintaining the SPARC improvement is an open question.
 
 5. **Connection to other modified-gravity proposals?** Particularly Scherer
    et al. 2025 (p-Laplacian) — same conceptual neighborhood but distinct
    variables and forms.
+
+6. **What is the proper scope of p(Σ)?** Possibilities:
+   - Phenomenological RAR description for SPARC's transition regime (current)
+   - Effective description of Y_disk degeneracy in low-mass galaxies
+   - Genuine new physics that requires modification at deep MOND limit
 
 ---
 

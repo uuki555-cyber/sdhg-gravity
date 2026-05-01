@@ -90,25 +90,54 @@ p(Σ):
 | DF-44 | 33 | 6.7 | 3.4 | McG |
 | Leo P | 15 | 6.3 | 1.8 | McG |
 
-**Honest finding**: p(Σ) does NOT distinguish itself from McGaugh+EFE on
-satellites and UDGs. In the EFE-dominated regime where μ → 0, the shape
-difference between p=0.5 and p<<0.5 is degenerate.
+**Honest finding (precise McGaugh 2016 formalism, `efe_mond.py`)**:
 
-**The cleanest distinguishing prediction is in the TRANSITION regime**
-(x = g_bar/a_0 ~ 1), which is exactly where typical SPARC disk galaxies
-sit. That's why we get ΔBIC = 177 there.
+We implemented McGaugh 2016's exact EFE formulas:
+- σ_iso⁴ = (4/81) G M a_0
+- σ_efe² = a_0 G M / (3 g_ex r_{1/2})
+- ν(y) = 1/y (deep MOND)
+- r_{1/2} = (4/3) × r_h (Wolf+2010)
 
-For deep-MOND-suppressed systems (UDGs in clusters, satellites in groups):
-p(Σ) and McGaugh make similar predictions because both predict μ → 0.
+This reproduces McGaugh 2016's Crater II prediction σ_efe = 2.06 km/s,
+matching his published 2.1 km/s exactly.
+
+For p(Σ)+EFE, the predictions are systematically too LOW:
+
+| Galaxy | σ_obs | σ_McG_EFE | σ_pΣ_EFE |
+|--------|:-----:|:---------:|:--------:|
+| Crater II | 2.7 | 2.06 ✓ | 0.58 |
+| Sculptor | 9.2 | 8.70 ✓ | 4.34 |
+| Antlia II | 5.7 | 1.82 | 0.58 |
+| Draco | 9.1 | 3.92 | 1.74 |
+
+**Why does p(Σ) under-predict?**
+
+McGaugh's exponential μ(x) = 1 - exp(-x^p) gives the deep-MOND limit
+g_obs = g_bar^(1-p) × g_†^p. For:
+- p = 0.5 (McGaugh): g_obs = √(g_bar a_0) — standard MOND ✓
+- p → 0 (low-Σ p(Σ)): g_obs → g_bar — Newtonian, no MOND boost ✗
+
+p(Σ)→0 at very low Σ DESTROYS the deep-MOND boost necessary to fit
+ultra-faint dwarfs.
+
+**Important honest conclusion**:
+
+p(Σ) is a phenomenological description calibrated to SPARC's TRANSITION
+regime (x = g_bar/a_0 ~ 1). It does NOT extrapolate properly to the
+deep-MOND regime (x << 1) where p must approach 0.5 to recover standard
+MOND scaling.
+
+This is a clear LIMITATION of p(Σ), not a feature. **The standard McGaugh
+formula (p=0.5 universal) remains the correct description for low-Σ
+satellite systems with EFE.**
+
+The proper scope of p(Σ) is:
+1. SPARC-like rotating disk galaxies in the transition regime (works: +14.7%)
+2. Galaxy clusters at high Σ (works: predicts p ≈ 0.66)
+3. NOT very-low-Σ systems where deep MOND scaling is essential
 
 **We retract** the earlier claim that p(Σ) "naturally explains" Crater II.
-Those systems are dominated by EFE/non-equilibrium effects, not by p(Σ).
-The result on UDG/satellite systems is **inconclusive** — neither
-disconfirming nor strongly supporting p(Σ) over McGaugh+EFE.
-
-**Caveat**: Our EFE implementation is approximate (factor √(g_in/(g_in+g_ex)))
-compared to McGaugh's detailed formalism. A proper p(Σ)+EFE comparison would
-require McGaugh-equivalent EFE machinery, which is beyond our scope.
+For very low-Σ satellites, McGaugh+EFE is correct, and p(Σ) is wrong.
 
 ### C3. "External Field Effect (EFE) is ignored"
 **Response**: Confirmed — our analysis assumes isolated equilibrium galaxies (same as McGaugh's RAR). EFE correction must be applied separately for satellites/group members. **p(Σ) is complementary to EFE, not a replacement.**
