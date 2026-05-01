@@ -121,11 +121,23 @@ python cdt_pachner.py              # 2+1D CDT with Pachner moves (Python)
 
 ## Related Work
 
-- Ambjørn, Jurkiewicz & Loll ([2005, PRL 95, 171301](https://doi.org/10.1103/PhysRevLett.95.171301)): Discovered spectral dimension flow from ~2 (UV) to ~4 (IR) in 4D CDT. See Limitations for detailed comparison with SDHG.
-- Desmond, Hees & Famaey ([2024, MNRAS 530, 1781](https://doi.org/10.1093/mnras/stae955)): Parametrized the same exponent (as delta/2 in their delta-family) but fit it as a universal constant, not mass-dependent.
-- EMOND — Zhao & Famaey (2012): Makes the acceleration scale a0 potential-dependent, not the exponent.
+**Closest prior work for p(Σ)**:
+- **Hofstetter & Kroupa (2025, [arXiv:2504.17002](https://arxiv.org/abs/2504.17002))**: p-Laplacian framework with density-dependent exponent. They use volume density ρ (not Σ) in a generalized Poisson equation (modifying the kinetic operator, not the local RAR slope). They do NOT use a sigmoid 2u/(1+3u) form or Σ₀ = a_0/(4π²G). Conceptually adjacent but distinct from p(Σ).
+- **Milgrom (2016, [arXiv:1607.05103](https://arxiv.org/abs/1607.05103))**: Central Surface Density Relation Σ_D⁰ = Σ_M·S(Σ_B⁰/Σ_M), with **Σ_M = a_0/(2πG) ≈ 137 M☉/pc²**. Σ enters as the *argument* of a fixed ν-function. **Σ_0 = a_0/(4π²G) = Σ_M/(2π)** (this work) is the mean-Σ analog of Milgrom's central CSDR scale; the 2π factor is geometric (disk integration). p(Σ) extends Milgrom's CSDR by allowing the function shape itself to depend on Σ.
+
+**Other Σ-related MOND work**:
+- EMOND — Zhao & Famaey (2012): potential-dependent a_0, not Σ-dependent μ shape.
+- Modified Inertia (Milgrom 2011, [arXiv:1111.1611](https://arxiv.org/abs/1111.1611)): different framework, ν universal.
+- Famaey & McGaugh (2012, [Living Rev. Rel.](https://link.springer.com/article/10.12942/lrr-2012-10)): comprehensive review confirming all standard μ-functions (Bekenstein, simple, standard, exponential) are universal.
+- Di Paolo, Salucci & Fontaine (2019, [arXiv:1810.08472](https://arxiv.org/abs/1810.08472)): empirical evidence of variable RAR slope in LSBs; no analytic p(Σ) proposed.
+- Desmond, Hees & Famaey ([2024, MNRAS 530, 1781](https://doi.org/10.1093/mnras/stae955)): delta-family parametrization with universal (not system-dependent) exponent.
+
+**CDT and quantum gravity**:
+- Ambjørn, Jurkiewicz & Loll ([2005, PRL 95, 171301](https://doi.org/10.1103/PhysRevLett.95.171301)): Discovered spectral dimension flow from ~2 (UV) to ~4 (IR) in 4D CDT. The CDT formula D_s(σ) = a - b/(c + σ^γ) with γ=1 has the same functional form as p(Σ) under v = 3(Σ/Σ_0)^α identification.
+
+**Other comparison points**:
 - Superfluid DM — Berezhiani & Khoury ([2015, PRD 92, 103510](https://doi.org/10.1103/PhysRevD.92.103510)): BEC phase transition could provide a physical mechanism for mass-dependent modification.
-- [arXiv:2603.23591](https://arxiv.org/abs/2603.23591) (2026): Found that central galaxies in groups/clusters deviate from the standard RAR, with the divergence radius decreasing with host mass — independent evidence for mass-dependent RAR behavior.
+- [arXiv:2603.23591](https://arxiv.org/abs/2603.23591) (2026): Found that central galaxies in groups/clusters deviate from the standard RAR — independent empirical evidence for non-universal RAR behavior.
 
 ## Subset Analysis
 
@@ -159,6 +171,12 @@ Global fit parameters: **Σ_0 = 10^7.36 M☉/kpc² = 22.9 M☉/pc²**, α_Σ ≈
 Σ_0 = a_0 / (4π²G)
 ```
 Predicted: 21.8 M☉/pc². Observed: 22.9 M☉/pc². Agreement: 5.1%.
+
+**Connection to Milgrom (2016) Central Surface Density Relation**:
+- Milgrom's central transition surface density: **Σ_M = a_0/(2πG) ≈ 137 M☉/pc²** (arXiv:1607.05103)
+- Our mean transition surface density: **Σ_0 = a_0/(4π²G) = Σ_M/(2π) ≈ 22 M☉/pc²**
+
+The factor 2π is geometric: for an exponential disk with Σ(R) = Σ_c exp(-R/R_d) and R_last/R_d ≈ 3-4 (typical SPARC), the mean Σ within R_last is ~1/(2π) of the central Σ_c. **Σ_0 is the mean-Σ expression of Milgrom's central CSDR scale Σ_M.** No new physical scale is introduced.
 
 This is a MOND-derived scale. The p(Σ) model has only ONE free parameter (α_Σ) beyond McGaugh, and α_Σ ≈ 5/3 naturally minimizes the RMS (cross-validated: α=5/3 gives +13.4% ± 2.9%, identical to free-α fit of +13.3% ± 3.0%).
 
