@@ -135,6 +135,41 @@ data (observed ~0.66, **1% agreement**).
 
 ---
 
+## Modified p(Σ) variants (`run_psigma_modified.py`)
+
+We tested variants that preserve deep MOND (p ≥ 0.5):
+
+| Variant | SPARC RMS | Δ vs McGaugh | Crater II p | Cluster p |
+|---------|:---------:|:------------:|:-----------:|:---------:|
+| McGaugh (p=0.5) | 0.197 | 0% | 0.5 | 0.5 |
+| **V0** (original) | **0.168** | **+14.7%** | **0.01** ✗ | **0.654** ✓ |
+| V1: max(0.5, p) | 0.191 | +3.2% | 0.5 ✓ | 0.654 ✓ |
+| V2: 0.5 + smooth | 0.203 | -3.0% | 0.5 ✓ | 0.658 ✓ |
+| V3: piecewise | 0.191 | +3.0% | 0.5 ✓ | 0.667 ✓ |
+
+**Subset analysis** (logM 7-9, dwarfs):
+- V0: +26.6%
+- V1: +1.2%
+
+**Critical finding**: V0's SPARC improvement comes primarily from
+p < 0.5 prediction at low Σ. This is INCOMPATIBLE with standard MOND
+deep-limit g = √(g_bar a_0). V1 preserves standard MOND but loses the
+dwarf improvement.
+
+**Cluster prediction is robust across all variants** (p ≈ 0.65-0.67),
+confirming the high-Σ tail prediction is independent of the low-Σ
+behavior.
+
+**Honest interpretation**: V0 is a phenomenological RAR fit that may
+absorb Y_disk or distance systematics in low-mass SPARC galaxies. It
+does not preserve standard MOND. V1/V3 are theoretically cleaner
+(McGaugh limit preserved) but give only modest SPARC improvement.
+
+**The cleanest claim**: Among p(Σ) variants, only the cluster scale
+prediction (Σ >> Σ_0) is unambiguously supported. The dwarf-galaxy
+improvement is V0-specific and conflicts with deep MOND at lower
+Σ regimes.
+
 ## What remains as open questions
 
 1. **Why β ≈ 0.4?** Galaxies are between Tully-Fisher (β=0.5) and 3D
