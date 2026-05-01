@@ -16,3 +16,21 @@ data/shakespeare.txt
 weibact_gpu_log.txt
 weibact_results.json
 data/enwik8*
+
+# Screen captures from screen recording
+ScreenCamera_*.json
+ScreenCapture_*.png
+
+# Photogrammetry / mesh tooling outputs (not part of SDHG science)
+output/
+test_photos/
+colmap-bin/
+colmap-cuda.zip
+benchmark_results.json
+
+# Tangential side experiments (not part of SDHG science)
+meshfix.py
+view_mesh.py
+green_reader.py
+generate_test_photos.py
+benchmark_meshfix.py
