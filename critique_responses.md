@@ -74,23 +74,41 @@ and our prepared responses, including what we *can* defend and what we *cannot*.
 ### C2. "What does p(Σ) predict that McGaugh's p=0.5 doesn't? (UDG predictions)"
 **Critique**: A theory needs distinguishing predictions.
 
-**Honest Response (revised)**:
+**Honest Response (after detailed EFE testing in `run_efe_predictions.py`)**:
 
-For Crater II:
-- p(Σ) prediction: σ ≈ 1 km/s
-- Observed: 2.7 km/s
-- **MOND+EFE prediction: 2.1 km/s** (McGaugh 2016)
-- **EFE-corrected MOND already explains Crater II — our coincidence with EFE is not a clean win**
+We tested 7 UDG/satellite systems (Crater II, Antlia II, Sculptor, Fornax,
+NGC1052-DF2, DF-44, Leo P) with EFE corrections applied to both McGaugh and
+p(Σ):
 
-For DF-2:
-- p(Σ) without EFE: σ ≈ 26 km/s
-- Observed: 8.5 km/s
-- MOND+EFE: 13 km/s
-- **p(Σ) is wrong without EFE here**
+| System | σ_obs | McG+EFE | p(Σ)+EFE | Better |
+|--------|:-----:|:-------:|:--------:|:------:|
+| Crater II | 2.7 | 1.0 | 0.17 | McG |
+| Antlia II | 5.7 | 1.1 | 0.15 | McG |
+| Sculptor | 9.2 | 4.9 | 3.5 | McG |
+| Fornax | 11.7 | 10.1 | 8.5 | McG |
+| NGC1052-DF2 | 8.5 | 21 | 19 | tie (both bad) |
+| DF-44 | 33 | 6.7 | 3.4 | McG |
+| Leo P | 15 | 6.3 | 1.8 | McG |
 
-**The distinguishing prediction we CAN make**: p(Σ) predicts a different shape of the RAR for **isolated equilibrium galaxies** at low Σ vs McGaugh. This requires careful sample selection (no satellites, no perturbed systems, no EFE). The cluster scale (Σ >> Σ_0) is where the prediction is cleanest and matches observed p ≈ 0.66.
+**Honest finding**: p(Σ) does NOT distinguish itself from McGaugh+EFE on
+satellites and UDGs. In the EFE-dominated regime where μ → 0, the shape
+difference between p=0.5 and p<<0.5 is degenerate.
 
-**We retract** the earlier claim that p(Σ) "naturally explains" Crater II/Antlia II. Those systems are dominated by EFE/non-equilibrium effects.
+**The cleanest distinguishing prediction is in the TRANSITION regime**
+(x = g_bar/a_0 ~ 1), which is exactly where typical SPARC disk galaxies
+sit. That's why we get ΔBIC = 177 there.
+
+For deep-MOND-suppressed systems (UDGs in clusters, satellites in groups):
+p(Σ) and McGaugh make similar predictions because both predict μ → 0.
+
+**We retract** the earlier claim that p(Σ) "naturally explains" Crater II.
+Those systems are dominated by EFE/non-equilibrium effects, not by p(Σ).
+The result on UDG/satellite systems is **inconclusive** — neither
+disconfirming nor strongly supporting p(Σ) over McGaugh+EFE.
+
+**Caveat**: Our EFE implementation is approximate (factor √(g_in/(g_in+g_ex)))
+compared to McGaugh's detailed formalism. A proper p(Σ)+EFE comparison would
+require McGaugh-equivalent EFE machinery, which is beyond our scope.
 
 ### C3. "External Field Effect (EFE) is ignored"
 **Response**: Confirmed — our analysis assumes isolated equilibrium galaxies (same as McGaugh's RAR). EFE correction must be applied separately for satellites/group members. **p(Σ) is complementary to EFE, not a replacement.**

@@ -37,6 +37,10 @@ data (observed ~0.66, **1% agreement**).
 - **Y_disk artifact excluded**: 0/200 false-positive rate in synthetic falsification
 - **Quality cuts preserve result**: high-Q SPARC subset gives +8.6%
 - **All Y_disk values [0.3, 0.7]** give >+11% improvement
+- **Unified corpus β verification** (`run_bigsparc_test.py`): On 403 galaxies
+  (SPARC 175 + LITTLE_THINGS 26 + WALLABY 202), β = 0.424 ± 0.010 (bootstrap),
+  consistent with SPARC alone β = 0.411 ± 0.011. Validates the α_Σ derivation
+  α_Σ = α_M/(1-2β) ≈ 1.9-2.1 across a 2.5× larger galaxy sample.
 
 ### Theoretical
 - **Σ_0 = a_0/(4π²G) connects to Milgrom (2016) Σ_M = a_0/(2πG)**:
@@ -68,12 +72,30 @@ data (observed ~0.66, **1% agreement**).
    identification, not derivation.
 
 ### Physical scope
-4. **External Field Effect (EFE) not modeled**: For satellites and group/cluster
-   members (Crater II, DF-2, Antlia II), EFE corrections must be applied separately.
-   p(Σ) is complementary to EFE, not a replacement. Earlier UDG predictions
-   without EFE were incorrect — retracted.
+4. **External Field Effect (EFE) regime is degenerate**: For satellites and
+   group/cluster members in deep MOND with EFE suppression, both p=0.5
+   (McGaugh) and p(Σ) predictions are dominated by μ → 0 behavior; the
+   exponent matters less. We tested 7 UDG/satellite systems with naive
+   EFE corrections (`run_efe_predictions.py`):
+   - p(Σ) does not clearly outperform McGaugh+EFE
+   - For Crater II, Antlia II, Sculptor, Fornax, DF-44, Leo P: McGaugh+EFE
+     is at least as good as p(Σ)+EFE
+   - Our naive EFE implementation (factor √(g_in/(g_in+g_ex))) is cruder
+     than McGaugh's published formulation
+   - **Conclusion**: p(Σ) is **not** a distinguishing prediction in
+     EFE-dominated regime. Earlier "p(Σ) explains Crater II" claim was
+     overstated. Retracted.
 
-5. **Equilibrium assumption**: McGaugh (2025) argues that ultradiffuse and
+5. **The distinguishing prediction is in the TRANSITION regime**: At
+   x = g_bar/a_0 ~ 1, μ(x) shape differences matter most. This is exactly
+   where typical SPARC disk galaxies sit, which is why ΔBIC = 177 there.
+   Clusters are at high Σ (transition complete, both predict p ≈ 2/3).
+   Deep-MOND satellites are at low Σ but EFE-dominated (μ → 0, shape
+   degenerate). The cleanest test of p(Σ) vs McGaugh would be a truly
+   isolated equilibrium galaxy at low Σ — but such systems are rare and
+   poorly measured.
+
+6. **Equilibrium assumption**: McGaugh (2025) argues that ultradiffuse and
    ultrafaint galaxies are out of equilibrium. Our analysis is restricted to
    equilibrium SPARC galaxies and clusters.
 

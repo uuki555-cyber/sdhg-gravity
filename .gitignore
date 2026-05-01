@@ -34,3 +34,6 @@ view_mesh.py
 green_reader.py
 generate_test_photos.py
 benchmark_meshfix.py
+
+# Unified rotation curve corpus (downloaded externally)
+data/unified_corpus/
