@@ -135,6 +135,66 @@ data (observed ~0.66, **1% agreement**).
 
 ---
 
+## Final recommended model: V7 dual-regime
+
+Following further investigation (`run_psigma_advanced.py`, `run_beta_origin.py`),
+we recommend the **dual-regime formulation**:
+
+```
+p(Σ) = 0.5                        if Σ < Σ_min  (deep MOND regime)
+p(Σ) = 2u/(1+3u), u=(Σ/Σ_0)^α     if Σ ≥ Σ_min  (SPARC transition regime)
+```
+
+with **Σ_min ≈ 10⁶ M☉/kpc² ≈ 1 M☉/pc²**, **Σ_0 = a_0/(4π²G)**, **α = 5/3**.
+
+**Why dual-regime is cleaner**:
+- Below Σ_min: standard MOND deep limit (p=0.5) preserved
+- Above Σ_min: SPARC transition physics with p(Σ) variable shape
+- Σ_min ≈ minimum Σ in SPARC sample (logΣ ≈ 6.5)
+- Acknowledges that SPARC fit is calibrated to its own range; ultra-faint
+  dwarfs are extrapolation territory
+
+**Results with V7 dual-regime** (`run_psigma_advanced.py`):
+- SPARC global fit: +14.7% (identical to V0; SPARC galaxies all have Σ > Σ_min)
+- p(Crater II) = 0.500 ✓ (deep MOND preserved)
+- p(cluster) = 0.656 ✓ (observed ~0.66)
+- Subset improvements:
+  - logM 7-9: +29.4%
+  - logM 9-10: +15.9%
+  - logM 10-11: +3.8%
+  - logM 11-13: -1.3%
+
+This is the recommended formulation for the paper.
+
+## β = 0.4 partial first-principles derivation (`run_beta_origin.py`)
+
+We attempted to derive β = 0.4 from first principles. Results:
+
+| Component | Slope (β) |
+|-----------|-----------|
+| R-M_star | 0.310 ± 0.016 |
+| R-M_dyn | 0.411 ± 0.011 |
+| R-M_gas | 0.506 ± 0.014 |
+
+R-M_gas ≈ 0.5 (Tully-Fisher prediction in deep MOND).
+R-M_star ≈ 0.31 (size-luminosity relation).
+R-M_dyn ≈ 0.4 is the weighted average reflecting galaxy stellar/gas content.
+
+The "**5/12 conjecture**" (β = 5/12 = 0.4167) is consistent with observation
+to 1.3%. If R ∝ V^(5/3) and M ∝ V⁴ (Tully-Fisher), then β = 5/12. This is
+suggestive but R ∝ V^(5/3) itself remains observational.
+
+By mass range:
+- logM 7.5-9 (gas-dom): β = 0.43 (closer to TF)
+- logM 9-10: β = 0.42
+- logM 10-11: β = 0.36 (star-dominated)
+- logM 11-12.5: β = 0.51
+
+**Honest conclusion**: β ≈ 0.4 is **not** derivable from first principles
+within standard MOND. It's a weighted average of the stellar (β≈0.31) and
+gas (β≈0.51) R-M scaling, reflecting the typical galaxy gas fraction.
+For β = 0.4 exactly, the corresponding Σ-M slope is δ ≈ 0.2.
+
 ## Modified p(Σ) variants (`run_psigma_modified.py`)
 
 We tested variants that preserve deep MOND (p ≥ 0.5):
