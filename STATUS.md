@@ -166,6 +166,42 @@ with **Σ_min ≈ 10⁶ M☉/kpc² ≈ 1 M☉/pc²**, **Σ_0 = a_0/(4π²G)**, *
 
 This is the recommended formulation for the paper.
 
+## Independent verification with MF96 (2443 galaxies, `run_mf96_test.py`)
+
+We tested the β = R-M relation on the Mathewson & Ford (1996) southern
+spirals (Vizier J/ApJS/107/97), 2443 galaxies, completely independent
+from SPARC. Result:
+
+| Sample | N | Tracer | β | α_Σ predicted |
+|--------|--:|--------|--:|--------------:|
+| SPARC | 171 | HI+Hα | 0.411 ± 0.011 | 1.88 |
+| LITTLE_THINGS+WALLABY | 228 | HI | 0.424 ± 0.015 | 2.19 |
+| **MF96** | **2443** | **Hα optical** | **0.351 ± 0.004** | **1.12** |
+
+The MF96 β is significantly different from the HI-derived samples,
+reflecting:
+
+1. **Sample composition**: MF96 is dominated by massive disk galaxies
+   (logM 10-12.5), where star-dominated R-M_star slope (~0.31)
+   dominates. SPARC has wider mass range with more gas-rich dwarfs.
+
+2. **Methodology**: MF96 uses W20/2 rotation velocity and D0 (optical
+   isophotal diameter). SPARC uses V_flat from rotation curve and
+   R_last. Different operational definitions of R and V.
+
+3. **Tracer**: Hα probes warm ionized gas, HI probes cold neutral gas.
+   The two can give slightly different rotation profiles.
+
+**Honest implication**: β (and thus α_Σ via α = α_M/(1-2β)) is
+sample-dependent. There is no universal α_Σ value; it adapts to the
+galaxy sample's mass distribution and structural type. This is a
+limitation: p(Σ) is a phenomenological fit specific to the calibration
+sample.
+
+The headline α = 5/3 corresponds to the SPARC mass distribution.
+For a different sample (e.g., MF96 massive spirals), the appropriate
+α would be different (~1.1).
+
 ## β = 0.4 partial first-principles derivation (`run_beta_origin.py`)
 
 We attempted to derive β = 0.4 from first principles. Results:
